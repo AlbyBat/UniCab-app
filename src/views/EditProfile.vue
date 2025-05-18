@@ -1,23 +1,69 @@
 <template>
-  <div class="edit-profile">
-    <h2>Modifica Profilo</h2>
-    <form @submit.prevent="updateProfile">
-      <label>Nome:</label>
-      <input v-model="form.name" type="text" required />
+  <div class="min-h-screen bg-gray-100">
+    
+    <header class="bg-white shadow p-4 flex justify-between items-center">
+      <nav class="space-x-4">
+        <button @click="goToHome" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+          Home
+        </button>
+        <button @click="goToEdit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
+          Modifica dati
+        </button>
+        <button @click="goToLanding" class="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800 transition">
+          Viaggi Disponibili
+       </button>
+        <button @click="goToSupport" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+          Supporto
+        </button>
+        <button @click="logout" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+          Logout
+        </button>
+      </nav>
+    </header>
 
-      <label>Telefono:</label>
-      <input
-        type="tel"
-        v-model="form.phone"
-        placeholder="Es. 3331234567"
-      />
-      <span v-if="phoneError" class="error-message">{{ phoneError }}</span>
+    
+    <main class="max-w-2xl mx-auto bg-white mt-6 p-6 rounded shadow">
+      <h1 class="text-4xl font-bold text-gray-700">Modifica Profilo</h1>
+      <form @submit.prevent="updateProfile" class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Nome</label>
+          <input
+            v-model="form.name"
+            type="text"
+            required
+            class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 text-gray-800"
+          />
+        </div>
 
-      <label>Veicolo:</label>
-      <input v-model="form.vehicle" type="text" />
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Telefono</label>
+          <input
+            v-model="form.phone"
+            type="tel"
+            placeholder="Es. 3331234567"
+            class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 text-gray-800"
+            :class="{ 'border-red-500': phoneError }"
+          />
+          <p v-if="phoneError" class="text-red-600 text-sm mt-1">{{ phoneError }}</p>
+        </div>
 
-      <button type="submit">Salva</button>
-    </form>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Veicolo</label>
+          <input
+            v-model="form.vehicle"
+            type="text"
+            class="mt-1 block w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 text-gray-800"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+        >
+          Salva
+        </button>
+      </form>
+    </main>
   </div>
 </template>
 
@@ -35,6 +81,11 @@ export default {
   },
   async created() {
     const token = localStorage.getItem('token')
+    if (!token) {
+      this.$router.push('/login')
+      return
+    }
+
     const res = await fetch('/api/home', {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -58,39 +109,40 @@ export default {
       }
     },
     async updateProfile() {
-    const isPhoneValid = this.validatePhone()
-    if (!isPhoneValid) return
+      if (!this.validatePhone()) return
 
-    const token = localStorage.getItem('token')
-    const res = await fetch('/api/user/profile', {
+      const token = localStorage.getItem('token')
+      const res = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(this.form)
-    })
+      })
 
-    const data = await res.json()
-    if (res.ok) {
+      const data = await res.json()
+      if (res.ok) {
         alert('Profilo aggiornato')
-        this.$router.push('/')
-    } else {
+        this.$router.push('/home')
+      } else {
         console.error('Errore:', data)
         alert('Errore aggiornamento: ' + (data.message || ''))
-     }
+      }
+    },
+    goToHome() {
+      this.$router.push('/home')
+    },
+    goToSupport() {
+      this.$router.push('/support')
+    },
+    goToLanding() {
+    this.$router.push('/');
+  },
+    logout() {
+      localStorage.removeItem('token')
+      this.$router.push('/login')
     }
-
   }
 }
 </script>
-
-<style scoped>
-.input-error {
-  border-color: red;
-}
-.error-message {
-  color: red;
-  font-size: 0.9em;
-}
-</style>
