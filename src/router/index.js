@@ -6,6 +6,8 @@ import EditProfile from '@/views/EditProfile.vue';
 import LandingView from '@/views/Landing.vue';
 import SupportView from '@/views/Support.vue';
 import AdminDashboard from '@/views/AdminDashboard.vue';
+import RideDetails from '../views/RideDetails.vue';
+import BookingView from '../views/Booking.vue';
 
 const routes = [
   { path: '/register', component: RegisterView },
@@ -14,6 +16,8 @@ const routes = [
   { path: '/home/edit', component: EditProfile },
   { path: '/support', component: SupportView },
   { path: '/', component: LandingView },
+  { path: '/:id', component: RideDetails },
+  { path: '/booking/:id', component: BookingView },
   { path: '/admin-dashboard', component: AdminDashboard, meta: { requiresAdmin: true }
 }
 ];

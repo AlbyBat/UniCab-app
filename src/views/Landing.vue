@@ -16,7 +16,7 @@
 <h2 class="text-3xl font-bold" style="color: #004d99;">Viaggi disponibili</h2>
     <div v-if="rides.length === 0">Nessun viaggio disponibile</div>
     <div v-else class="rides-list">
-      <div v-for="ride in rides" :key="ride._id" class="ride-card">
+      <div v-for="ride in rides" :key="ride._id" @click="goToRide(ride._id)" class="bg-white p-4 rounded-xl shadow-md cursor-pointer hover:shadow-lg transition">
         <h3>{{ ride.startPoint.address }} → {{ ride.endPoint.address }}</h3>
         <p><strong>Partenza:</strong> {{ formatDate(ride.departureTime) }}</p>
         <p><strong>Posti disponibili:</strong> {{ ride.availableSeats }}</p>
@@ -49,6 +49,9 @@ export default {
     formatDate(datetime) {
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
       return new Date(datetime).toLocaleDateString('it-IT', options);
+    },
+    goToRide(id) {
+      this.$router.push(`/${id}`);
     }
   }
 };
@@ -57,7 +60,7 @@ export default {
 <style scoped>
 .landing {
   padding: 2rem;
-  background-color: #f9f9f9;
+  background-color: white;
   color: #222;
   min-height: 100vh;
 }
