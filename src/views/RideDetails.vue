@@ -66,7 +66,7 @@ export default {
             },
             body: JSON.stringify({
             seats: this.seatsToBook,
-            participants: [1] 
+            participants: []
             })
         });
 
@@ -78,7 +78,8 @@ export default {
         }
 
         alert('Prenotazione effettuata con successo!');
-        this.$router.push(`/booking/${rideId}`);
+        localStorage.setItem('lastRide', JSON.stringify(this.ride));
+        this.$router.push(`/booking/${data.bookingId}`);
         } catch (err) {
         console.error('Errore nella richiesta:', err);
         alert('Errore durante la prenotazione.');

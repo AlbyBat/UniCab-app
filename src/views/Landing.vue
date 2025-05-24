@@ -1,6 +1,5 @@
 <template>
   <div class="landing">
-  
     <nav class="navbar">
       <div class="nav-left">
         <h1 class="text-4xl"> UniCab</h1>
@@ -12,25 +11,33 @@
       </div>
     </nav>
 
+    <div class="main-content">
+  
+      <div id="map" class="map"></div>
 
-<h2 class="text-3xl font-bold" style="color: #004d99;">Viaggi disponibili</h2>
-    <div v-if="rides.length === 0">Nessun viaggio disponibile</div>
-    <div v-else class="rides-list">
-      <div v-for="ride in rides" :key="ride._id" @click="goToRide(ride._id)" class="bg-white p-4 rounded-xl shadow-md cursor-pointer hover:shadow-lg transition">
-        <h3>{{ ride.startPoint.address }} → {{ ride.endPoint.address }}</h3>
-        <p><strong>Partenza:</strong> {{ formatDate(ride.departureTime) }}</p>
-        <p><strong>Posti disponibili:</strong> {{ ride.availableSeats }}</p>
-        <p><strong>Prezzo:</strong> €{{ ride.price.toFixed(2) }}</p>
-        <p v-if="ride.additionalInfo"><strong>Note:</strong> {{ ride.additionalInfo }}</p>
-        <div class="driver-info" v-if="ride.driver">
-          <p><strong>Rating Autista:</strong> {{ ride.driver.rating }}</p>
+
+      <div class="rides-panel">
+        <h2 class="text-2xl font-bold mb-4">Viaggi disponibili</h2>
+        <div v-if="rides.length === 0">Nessun viaggio disponibile</div>
+        <div v-else class="rides-list">
+          <div v-for="ride in rides" :key="ride._id" @click="goToRide(ride._id)" class="ride-card">
+            <h3>{{ ride.startPoint.address }} → {{ ride.endPoint.address }}</h3>
+            <p><strong>Partenza:</strong> {{ formatDate(ride.departureTime) }}</p>
+            <p><strong>Posti disponibili:</strong> {{ ride.availableSeats }}</p>
+            <p><strong>Prezzo:</strong> €{{ ride.price.toFixed(2) }}</p>
+            <p v-if="ride.additionalInfo"><strong>Note:</strong> {{ ride.additionalInfo }}</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
 
+
 <script>
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
 export default {
   data() {
     return {
@@ -45,9 +52,21 @@ export default {
       console.error('Errore nel caricamento dei viaggi:', err);
     }
   },
+  mounted() {
+    
+    const map = L.map('map').setView([46.06, 11.12], 13); 
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+  },
   methods: {
     formatDate(datetime) {
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+      const options = {
+        weekday: 'long', year: 'numeric', month: 'long',
+        day: 'numeric', hour: '2-digit', minute: '2-digit'
+      };
       return new Date(datetime).toLocaleDateString('it-IT', options);
     },
     goToRide(id) {
@@ -58,11 +77,19 @@ export default {
 </script>
 
 <style scoped>
+
+html, body, #app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 .landing {
-  padding: 2rem;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
   background-color: white;
   color: #222;
-  min-height: 100vh;
 }
 
 .navbar {
@@ -72,7 +99,6 @@ export default {
   background-color: #004d99;
   padding: 1rem 2rem;
   border-radius: 8px;
-  margin-bottom: 2rem;
   color: white;
 }
 
@@ -100,13 +126,25 @@ export default {
   background-color: #cce0ff;
 }
 
-.join-btn {
-  background-color: #ff6600;
-  color: white;
+
+.main-content {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  height: 100%;
 }
 
-.join-btn:hover {
-  background-color: #e65c00;
+.map {
+  flex: 3;
+  height: auto;
+}
+
+.rides-panel {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border-left: 2px solid #ccc;
 }
 
 .rides-list {
@@ -116,11 +154,23 @@ export default {
 }
 
 .ride-card {
-  border: 1px solid #ccc;
+  background-color: white;
   padding: 1rem;
   border-radius: 8px;
-  background-color: white;
-  color: #333;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+.ride-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.join-btn {
+  background-color: #ff6600;
+  color: white;
+}
+
+.join-btn:hover {
+  background-color: #e65c00;
 }
 </style>

@@ -9,15 +9,15 @@
       <p><strong>Posti totali disponibili:</strong> {{ ride.availableSeats }}</p>
       <p><strong>Posti già prenotati:</strong> {{ totalBookedSeats }}</p>
 
-      <div v-for="booking in ride.bookings" :key="booking._id" class="border-t pt-4 mt-4">
-        <p><strong>Utente:</strong> {{ booking.userId }}</p>
+      <div v-if="booking" class="border-t pt-4 mt-4">
+        <p><strong>Utente:</strong> {{ booking.userId.username }} </p>
         <p><strong>Posti prenotati:</strong> {{ booking.seats }}</p>
 
         <div v-if="booking.participants && booking.participants.length">
           <strong>Partecipanti:</strong>
           <ul class="list-disc list-inside">
-            <li v-for="p in booking.participants" :key="p.userId">
-              ID: {{ p.userId }} —
+            <li v-for="p in booking.participants" :key="p.userId._id">
+              ID: {{ p.userId.name }} — 
               <span :class="p.confirmed ? 'text-green-600' : 'text-red-600'">
                 {{ p.confirmed ? 'Confermato' : 'In attesa' }}
               </span>
@@ -25,6 +25,7 @@
           </ul>
         </div>
       </div>
+
     </div>
 
     <div v-else class="text-gray-600">Caricamento in corso...</div>
@@ -35,7 +36,8 @@
 export default {
   data() {
     return {
-      ride: null
+      ride: null,
+      booking: null
     };
   },
   computed: {
@@ -45,17 +47,22 @@ export default {
   },
   async mounted() {
     const token = localStorage.getItem('token');
-    const rideId = this.$route.params.id;
-
+    const bookingId = this.$route.params.id;
+    const rideData = localStorage.getItem('lastRide');
+    if (rideData) {
+      this.ride = JSON.parse(rideData);
+      localStorage.removeItem('lastRide'); // pulizia
+    }
     try {
-      const res = await fetch(`/api/rides/${rideId}`, {
+      const res = await fetch(`/api/bookings/${bookingId}`, {
+        method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
 
-      if (!res.ok) throw new Error('Errore nel caricamento del viaggio');
-      this.ride = await res.json();
+      if (!res.ok) throw new Error('Errore nel caricamento della prenotazione');
+      this.booking = await res.json();
     } catch (err) {
       console.error(err);
     }
