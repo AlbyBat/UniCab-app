@@ -8,12 +8,16 @@ import SupportView from '@/views/Support.vue';
 import AdminDashboard from '@/views/AdminDashboard.vue';
 import RideDetails from '../views/RideDetails.vue';
 import BookingView from '../views/Booking.vue';
+import AddRide from '@/views/AddRide.vue';
+import BookingList from '@/views/BookingList.vue';
 
 const routes = [
   { path: '/register', component: RegisterView },
   { path: '/login', component: LoginView },
   { path: '/home', component: HomeView },
   { path: '/home/edit', component: EditProfile },
+  { path: '/home/create', component: AddRide },
+  { path: '/home/bookings', component: BookingList },
   { path: '/support', component: SupportView },
   { path: '/', component: LandingView },
   { path: '/:id', component: RideDetails },
