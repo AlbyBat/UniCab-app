@@ -17,11 +17,13 @@
           <strong>Partecipanti:</strong>
           <ul class="list-disc list-inside">
             <li v-for="p in booking.participants" :key="p.userId._id">
-              ID: {{ p.userId.name }} — 
+              Nome: {{ p.userId.name }} — 
               <span :class="p.confirmed ? 'text-green-600' : 'text-red-600'">
                 {{ p.confirmed ? 'Confermato' : 'In attesa' }}
               </span>
+            
             </li>
+             <button @click="confirmParticipation" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"> Conferma prenotazione </button>
           </ul>
         </div>
       </div>
@@ -33,17 +35,22 @@
 </template>
 
 <script>
+import router from '@/router';
+
 export default {
   data() {
     return {
       ride: null,
-      booking: null
+      booking: null,
+      userId: null
     };
   },
   computed: {
     totalBookedSeats() {
-        console.log('Bookings:', this.ride.bookings);
-        this.ride.bookings.forEach((b, i) => { console.log(`Booking ${i}:`, b.seats);});
+      console.log('Bookings:', this.ride?.bookings);
+      this.ride?.bookings?.forEach((b, i) => {
+        console.log(`Booking ${i}:`, b.seats);
+      });
       return this.ride?.bookings?.reduce((sum, b) => sum + b.seats, 0) || 0;
     }
   },
@@ -51,10 +58,18 @@ export default {
     const token = localStorage.getItem('token');
     const bookingId = this.$route.params.id;
     const rideData = localStorage.getItem('lastRide');
+    const userData = localStorage.getItem('user');
+
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      this.userId = parsedUser.userId;
+    }
+
     if (rideData) {
       this.ride = JSON.parse(rideData);
       localStorage.removeItem('lastRide'); // pulizia
     }
+
     try {
       const res = await fetch(`/api/bookings/${bookingId}`, {
         method: 'GET',
@@ -75,10 +90,33 @@ export default {
         dateStyle: 'full',
         timeStyle: 'short'
       });
+    },
+    async confirmParticipation() {
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`/api/bookings/${this.ride._id}/confirm`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || 'Errore nella conferma');
+        }
+
+        alert('Partecipazione confermata!');
+        router.push('/home');
+      } catch (err) {
+        console.error(err);
+        alert(err.message);
+      }
     }
   }
 };
 </script>
+
 
 <style scoped>
 </style>
