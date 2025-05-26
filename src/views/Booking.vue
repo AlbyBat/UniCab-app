@@ -42,6 +42,8 @@ export default {
   },
   computed: {
     totalBookedSeats() {
+        console.log('Bookings:', this.ride.bookings);
+        this.ride.bookings.forEach((b, i) => { console.log(`Booking ${i}:`, b.seats);});
       return this.ride?.bookings?.reduce((sum, b) => sum + b.seats, 0) || 0;
     }
   },
