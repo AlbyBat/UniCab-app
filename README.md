@@ -21,6 +21,8 @@ npm install
 ```sh
 npm run dev
 ```
+Bisogna anche avviare il server API "https://github.com/brna23/UniCab-API" 
+
 
 ### Compile and Minify for Production
 
