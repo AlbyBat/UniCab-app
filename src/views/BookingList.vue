@@ -65,7 +65,7 @@ export default {
   async created() {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('/api/rides/my-bookings', {
+      const res = await fetch('/api/bookings/my-bookings', {
         headers: {
           method: 'GET',
           Authorization: `Bearer ${token}`
@@ -117,7 +117,7 @@ export default {
         }
 
         alert('Prenotazione cancellata con successo!');
-        location.reload(); // Oppure aggiorna lo stato dei dati senza ricaricare
+        location.reload(); 
       } catch (err) {
         console.error(err);
         alert(err.message);

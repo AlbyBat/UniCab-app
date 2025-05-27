@@ -42,6 +42,9 @@
       <button @click="goToCreateRide" class="bg-purple-600 text-white py-3 px-4  rounded hover:bg-purple-700 transition text-lg">
         Crea nuovo viaggio
       </button>
+      <button @click="goToRides" class="bg-purple-600 text-white py-3 px-4  rounded hover:bg-purple-700 transition text-lg">
+        Visualizza i tuoi viaggi
+      </button>
     </div>
   </div>
 </template>
@@ -94,6 +97,9 @@ export default {
     },
     goToCreateRide() {
   this.$router.push('/home/create'); 
+    },
+    goToRides() {
+  this.$router.push('/home/rides'); 
     },
     goToBookings() {
       this.$router.push('/home/bookings');

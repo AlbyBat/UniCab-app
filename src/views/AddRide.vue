@@ -36,8 +36,12 @@
             <textarea v-model="form.additionalInfo" class="w-full border p-2 rounded"></textarea>
           </div>
 
-          <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 transition">
-            Pubblica Viaggio
+          <button
+            type="submit"
+            class="w-full bg-blue-600 text-white py-3 rounded transition hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="isSubmitting"
+          >
+            {{ isSubmitting ? 'Pubblicazione in corso...' : 'Pubblica Viaggio' }}
           </button>
         </form>
       </div>
@@ -52,15 +56,13 @@
 
 
 <script>
+import { useMapTools } from '@/composables/useMapTools';
 import L from 'leaflet';
 
 export default {
-  watch: {    //come il listener di java
-  'form.startAddress'(val) {     this.debouncedUpdateMap();  },
-  'form.endAddress'(val) {    this.debouncedUpdateMap();  }
-  },
-  mounted() {
-    this.debouncedUpdateMap = this.debounce(this.updateMap, 1000);
+  setup() {
+    const { geocodeAddress, initializeMap, drawRoute } = useMapTools();
+    return { geocodeAddress, initializeMap, drawRoute };
   },
   data() {
     return {
@@ -70,13 +72,25 @@ export default {
         departureTime: '',
         availableSeats: 1,
         price: 0,
-        additionalInfo: '',
-        map: null,
-        startMarker: null,
-        endMarker: null,
-        routeLayer: null
-      }
+        additionalInfo: ''
+      },
+      isSubmitting: false,
+      map: null,
+      startMarker: null,
+      endMarker: null,
+      routeLayer: null
     };
+  },
+  mounted() {
+    this.debouncedUpdateMap = this.debounce(this.updateMap, 1000);
+  },
+  watch: {
+    'form.startAddress'(val) {
+      this.debouncedUpdateMap();
+    },
+    'form.endAddress'(val) {
+      this.debouncedUpdateMap();
+    }
   },
   methods: {
     async updateMap() {
@@ -85,136 +99,75 @@ export default {
       try {
         const startCoords = await this.geocodeAddress(this.form.startAddress);
         const endCoords = await this.geocodeAddress(this.form.endAddress);
-
         const startLatLng = [startCoords[1], startCoords[0]];
         const endLatLng = [endCoords[1], endCoords[0]];
 
         if (!this.map) {
-          this.map = L.map('map').setView(startLatLng, 13);
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-          }).addTo(this.map);
+          this.map = this.initializeMap('map', startLatLng);
         }
 
+      
         if (this.startMarker) this.map.removeLayer(this.startMarker);
         if (this.endMarker) this.map.removeLayer(this.endMarker);
         if (this.routeLayer) this.map.removeLayer(this.routeLayer);
 
+        
         this.startMarker = L.marker(startLatLng).addTo(this.map).bindPopup('Partenza').openPopup();
         this.endMarker = L.marker(endLatLng).addTo(this.map).bindPopup('Destinazione');
 
-        const url = `https://router.project-osrm.org/route/v1/driving/${startCoords[0]},${startCoords[1]};${endCoords[0]},${endCoords[1]}?overview=full&geometries=geojson`;
-
-        const res = await fetch(url);
-        const data = await res.json();
-
-        if (data.routes && data.routes.length) {
-          const route = data.routes[0].geometry;
-          this.routeLayer = L.geoJSON(route, {
-            style: { color: 'blue', weight: 4 }
-          }).addTo(this.map);
-          const coords = route.coordinates.map(c => [c[1], c[0]]);
-          this.map.fitBounds(coords);
-        }
+      
+        this.routeLayer = await this.drawRoute(this.map, startCoords, endCoords);
       } catch (err) {
         console.warn('Errore aggiornamento mappa:', err.message);
       }
-  },
-    async geocodeAddress(address) {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'carpooling-app/1.0' //per nominatim
-        }
-      });
-      const data = await response.json();
-      if (!data || data.length === 0) throw new Error(`Impossibile trovare coordinate per: ${address}`);
-      return [parseFloat(data[0].lon), parseFloat(data[0].lat)];
-  },
-      async loadMap() {
-      if (!this.ride?.startPoint?.coordinates || !this.ride?.endPoint?.coordinates) {
-        console.warn('Coordinate non disponibili');
-        return;
-      }
+    },
 
-      const start = [this.ride.startPoint.coordinates[1], this.ride.startPoint.coordinates[0]];
-      const end = [this.ride.endPoint.coordinates[1], this.ride.endPoint.coordinates[0]];
+    debounce(func, wait) {
+      let timeout;
+      return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    },
 
-      //unizializza la mappa
-      const map = L.map('map').setView(start, 13);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-
-      //aggiunge marker
-      L.marker(start).addTo(map).bindPopup('Partenza').openPopup();
-      L.marker(end).addTo(map).bindPopup('Destinazione');
-
-      //carica percorso
-      const url = `https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson`;
+    async submitRide() {
+      this.isSubmitting = true;
+      const token = localStorage.getItem('token');
 
       try {
-        const res = await fetch(url);
-        const data = await res.json();
+        const startCoordinates = await this.geocodeAddress(this.form.startAddress);
+        const endCoordinates = await this.geocodeAddress(this.form.endAddress);
 
-        if (data.routes && data.routes.length) {
-          const route = data.routes[0].geometry;
-          L.geoJSON(route, {
-            style: { color: 'blue', weight: 4 }
-          }).addTo(map);
+        const payload = {
+          ...this.form,
+          startCoordinates,
+          endCoordinates
+        };
 
-          const coords = route.coordinates.map(c => [c[1], c[0]]);
-          map.fitBounds(coords);
-        } else {
-          console.warn('Nessun percorso trovato');
+        const res = await fetch('/api/rides', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || 'Errore nella creazione del viaggio');
         }
+
+        alert('Viaggio creato con successo!');
+        this.$router.push('/');
       } catch (err) {
-        console.error('Errore nel caricamento della rotta:', err);
+        console.error(err);
+        alert(`Errore: ${err.message}`);
+      } finally {
+        this.isSubmitting = false;
       }
-  },
-  debounce(func, wait) {
-    let timeout;
-    return function (...args) {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-  },
-  async submitRide() {
-    const token = localStorage.getItem('token');
-
-    try {
-      const startCoordinates = await this.geocodeAddress(this.form.startAddress);
-      const endCoordinates = await this.geocodeAddress(this.form.endAddress);
-
-      const payload = {
-        ...this.form,
-        startCoordinates,
-        endCoordinates
-      };
-
-      const res = await fetch('/api/rides', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Errore nella creazione del viaggio');
-      }
-
-      alert('Viaggio creato con successo!');
-      this.$router.push('/');
-    } catch (err) {
-      console.error(err);
-      alert(`Errore: ${err.message}`);
     }
   }
-}
 };
 </script>
 
