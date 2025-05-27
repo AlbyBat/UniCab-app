@@ -10,24 +10,25 @@
       <p><strong>Posti già prenotati:</strong> {{ totalBookedSeats }}</p>
 
       <div v-if="booking" class="border-t pt-4 mt-4">
-        <p><strong>Utente:</strong> {{ booking.userId.username }} </p>
+        <p><strong>Utente:</strong> {{ booking.userId.username }}</p>
         <p><strong>Posti prenotati:</strong> {{ booking.seats }}</p>
 
         <div v-if="booking.participants && booking.participants.length">
           <strong>Partecipanti:</strong>
           <ul class="list-disc list-inside">
             <li v-for="p in booking.participants" :key="p.userId._id">
-              Nome: {{ p.userId.name }} — 
+              Nome: {{ p.userId.name }} —
               <span :class="p.confirmed ? 'text-green-600' : 'text-red-600'">
                 {{ p.confirmed ? 'Confermato' : 'In attesa' }}
               </span>
-            
             </li>
-             <button @click="confirmParticipation" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"> Conferma prenotazione </button>
           </ul>
+          <button @click="confirmParticipation"
+                  class="mt-4 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">
+            Conferma prenotazione
+          </button>
         </div>
       </div>
-
     </div>
 
     <div v-else class="text-gray-600">Caricamento in corso...</div>
@@ -42,15 +43,13 @@ export default {
     return {
       ride: null,
       booking: null,
-      userId: null
+      userId: null,
+      isConfirmed: false,
+      warnOnLeave: true,
     };
   },
   computed: {
     totalBookedSeats() {
-      console.log('Bookings:', this.ride?.bookings);
-      this.ride?.bookings?.forEach((b, i) => {
-        console.log(`Booking ${i}:`, b.seats);
-      });
       return this.ride?.bookings?.reduce((sum, b) => sum + b.seats, 0) || 0;
     }
   },
@@ -67,22 +66,24 @@ export default {
 
     if (rideData) {
       this.ride = JSON.parse(rideData);
-      localStorage.removeItem('lastRide'); // pulizia
+      localStorage.removeItem('lastRide');
     }
 
     try {
       const res = await fetch(`/api/bookings/${bookingId}`, {
         method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
-
       if (!res.ok) throw new Error('Errore nel caricamento della prenotazione');
       this.booking = await res.json();
     } catch (err) {
       console.error(err);
     }
+
+    window.addEventListener('beforeunload', this.handleBeforeUnload);
+  },
+  beforeUnmount() {
+    window.removeEventListener('beforeunload', this.handleBeforeUnload);
   },
   methods: {
     formatDate(date) {
@@ -90,6 +91,12 @@ export default {
         dateStyle: 'full',
         timeStyle: 'short'
       });
+    },
+    handleBeforeUnload(e) {
+      if (this.warnOnLeave && !this.isConfirmed) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
     },
     async confirmParticipation() {
       const token = localStorage.getItem('token');
@@ -107,16 +114,49 @@ export default {
         }
 
         alert('Partecipazione confermata!');
+        this.isConfirmed = true;
+        this.warnOnLeave = false;
         router.push('/home');
       } catch (err) {
         console.error(err);
         alert(err.message);
       }
+    },
+    async cancelBookingIfUnconfirmed() {
+      if (!this.isConfirmed && this.booking?._id) {
+        const token = localStorage.getItem('token');
+        try {
+          const res = await fetch(`/api/bookings/${this.booking._id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (!res.ok) {
+            const err = await res.json();
+            console.error('Errore durante la cancellazione:', err.error);
+          } else {
+            console.log('Prenotazione cancellata automaticamente.');
+          }
+        } catch (err) {
+          console.error('Errore nel delete booking:', err);
+        }
+      }
+    }
+  },
+  beforeRouteLeave(to, from, next) {
+    if (this.warnOnLeave && !this.isConfirmed) {
+      if (window.confirm('Non hai confermato la prenotazione. Vuoi annullarla?')) {
+        this.cancelBookingIfUnconfirmed().then(() => {
+          next(); //continua navigazione
+        });
+      } else {
+        next(false); //blocca navigazione
+      }
+    } else {
+      next();
     }
   }
 };
 </script>
-
 
 <style scoped>
 </style>

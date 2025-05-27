@@ -83,7 +83,7 @@ export default {
         const res = await fetch(`/api/rides/${rideId}`);
         if (res.ok) {
           this.ride = await res.json();
-          this.initMap(); // solo dopo aver caricato i dati
+          this.initMap();
         } else {
           console.error('Errore caricamento:', await res.text());
         }
@@ -115,7 +115,7 @@ export default {
             return;
         }
 
-        alert('Prenotazione effettuata con successo!');
+        alert('Prenotazione temporanea effettuata! è necessario confermarla per renderla effettiva.');
         localStorage.setItem('lastRide', JSON.stringify(this.ride));
         this.$router.push(`/booking/${data.bookingId}`);
         } catch (err) {

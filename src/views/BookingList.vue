@@ -1,4 +1,23 @@
 <template>
+  <header class="bg-white shadow p-4 flex justify-between items-center">
+      <nav class="space-x-4">
+        <button @click="goToHome" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+          Home
+        </button>
+        <button @click="goToEdit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
+          Modifica dati
+        </button>
+        <button @click="goToLanding" class="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800 transition">
+          Viaggi Disponibili
+        </button>
+        <button @click="goToSupport" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+          Supporto
+        </button>
+        <button @click="logout" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+          Logout
+        </button>
+      </nav>
+    </header>
   <div class="min-h-screen bg-gray-100 p-6">
     <div class="max-w-4xl mx-auto bg-white shadow rounded p-6">
       <h1 class="text-3xl font-bold text-gray-800 mb-4">Le tue prenotazioni</h1>
@@ -24,15 +43,6 @@
           >
             <p><strong>Posti prenotati:</strong> {{ booking.seats }}</p>
             
-            <!-- <div v-if="booking.participants?.length">
-              <p class="font-semibold mt-1">Partecipanti:</p>
-              <ul class="list-disc list-inside">
-                <li v-for="(p, i) in booking.participants" :key="i">
-                  {{ p.name || 'Partecipante' }} - {{ p.phone || 'N/A' }}
-                </li>
-              </ul>
-            </div>
-            -->
             <div class="mt-2 space-x-2">
               <button 
                 @click="deleteBooking(booking._id)" 
@@ -97,7 +107,7 @@ export default {
       });
     },
     async editBooking(bookingId){
-
+      this.$router.push(`/home/bookings/edit/${bookingId}`);
     },
     async deleteBooking(bookingId){
       const token = localStorage.getItem('token');
@@ -122,6 +132,22 @@ export default {
         console.error(err);
         alert(err.message);
       }
+    },
+    goToEdit() {
+      this.$router.push('/home/edit');
+    },
+    goToHome() {
+      this.$router.push('/home');
+    },
+    goToLanding() {
+    this.$router.push('/');
+    },
+    goToSupport() {
+    this.$router.push('/support');
+    },
+    logout() {
+      localStorage.removeItem('token');
+      this.$router.push('/login');
     }
   }
 };

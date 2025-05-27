@@ -1,5 +1,24 @@
 <template>
-  <div class="min-h-screen bg-gray-100 p-6">
+    <header class="bg-white shadow p-4 flex justify-between items-center">
+      <nav class="space-x-4">
+        <button @click="goToHome" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+          Home
+        </button>
+        <button @click="goToEdit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
+          Modifica dati
+        </button>
+        <button @click="goToLanding" class="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800 transition">
+          Viaggi Disponibili
+        </button>
+        <button @click="goToSupport" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+          Supporto
+        </button>
+        <button @click="logout" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+          Logout
+        </button>
+      </nav>
+    </header>
+    <div class="min-h-screen bg-gray-100 p-6">
     <div class="max-w-4xl mx-auto bg-white shadow rounded p-6">
       <h1 class="text-3xl font-bold text-gray-800 mb-4">I tuoi viaggi da autista</h1>
 
@@ -31,7 +50,6 @@
             </ul>
           </div>
 
-          <!-- Pulsanti azione -->
           <div class="mt-4 space-x-2">
             <button
               @click="deleteRide(ride._id)"
@@ -119,12 +137,26 @@ export default {
       }
     },
     editRide(rideId) {
-      // Reindirizza alla pagina di modifica (deve esistere o essere implementata)
       this.$router.push(`/home/rides/edit/${rideId}`);
     },
     manageBookings(rideId) {
-      // Qui puoi cambiare comportamento: mostrare dettagli, aprire un modal, ecc.
       this.$router.push(`/home/rides/${rideId}/bookings`);
+    },
+    goToEdit() {
+      this.$router.push('/home/edit');
+    },
+    goToHome() {
+      this.$router.push('/home');
+    },
+    goToLanding() {
+    this.$router.push('/');
+    },
+    goToSupport() {
+    this.$router.push('/support');
+    },
+    logout() {
+      localStorage.removeItem('token');
+      this.$router.push('/login');
     }
   }
 };

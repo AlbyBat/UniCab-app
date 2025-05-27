@@ -1,45 +1,43 @@
 <template>
-  <div class="min-h-screen bg-gray-100 p-6">
-    <div class="max-w-3xl mx-auto bg-white p-6 shadow rounded">
-      <h1 class="text-2xl font-bold text-gray-800 mb-4">Modifica Viaggio</h1>
+  <div class="max-w-2xl mx-auto p-6 bg-white shadow rounded mt-8">
+    <h1 class="text-2xl font-bold mb-6">Modifica Prenotazione</h1>
 
-      <form @submit.prevent="submitForm">
-        <div class="mb-4">
-          <label class="block text-gray-700">Partenza</label>
-          <input v-model="form.startAddress" type="text" class="w-full border px-3 py-2 rounded" required />
-        </div>
+    <form @submit.prevent="submitForm" class="space-y-4">
+      <div>
+        <label class="block font-semibold mb-1">Posti prenotati</label>
+        <input
+          type="number"
+          v-model.number="form.seats"
+          min="1"
+          required
+          class="w-full border px-3 py-2 rounded"
+        />
+      </div>
 
-        <div class="mb-4">
-          <label class="block text-gray-700">Destinazione</label>
-          <input v-model="form.endAddress" type="text" class="w-full border px-3 py-2 rounded" required />
+      <div>
+        <label class="block font-semibold mb-1">Partecipanti</label>
+        <div v-for="(participant, index) in form.participants" :key="index" class="flex items-center space-x-2">
+            {{ participant.name }} ({{ participant._id }})
+            <input type="checkbox" v-model="form.participants[index].confirmed" />
+            <label>Confermato</label>
         </div>
+        <p v-if="form.participants.length === 0" class="text-gray-500 italic">Nessun partecipante</p>
+      </div>
 
-        <div class="mb-4">
-          <label class="block text-gray-700">Data e ora</label>
-          <input v-model="form.departureTime" type="datetime-local" class="w-full border px-3 py-2 rounded" required />
-        </div>
+      <div class="flex space-x-4">
+        <button
+          type="submit"
+          :disabled="isSubmitting"
+          class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+        >
+          {{ isSubmitting ? 'Salvando...' : 'Salva modifiche' }}
+        </button>
 
-        <div class="mb-4">
-          <label class="block text-gray-700">Posti disponibili</label>
-          <input v-model.number="form.availableSeats" type="number" min="1" class="w-full border px-3 py-2 rounded" required />
-        </div>
-
-        <div class="mb-4">
-          <label class="block text-gray-700">Prezzo (€)</label>
-          <input v-model.number="form.price" type="number" step="0.01" class="w-full border px-3 py-2 rounded" required />
-        </div>
-
-        <div class="mb-4">
-          <label class="block text-gray-700">Note aggiuntive</label>
-          <textarea v-model="form.additionalInfo" class="w-full border px-3 py-2 rounded" rows="3"></textarea>
-        </div>
-
-        <div class="flex space-x-2">
-          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Salva</button>
-          <button type="button" @click="$router.back()" class="bg-gray-300 text-black px-4 py-2 rounded">Annulla</button>
-        </div>
-      </form>
-    </div>
+        <button type="button" @click="$router.back()" class="bg-gray-300 px-6 py-2 rounded hover:bg-gray-400">
+          Annulla
+        </button>
+      </div>
+    </form>
   </div>
 </template>
 
@@ -48,75 +46,54 @@ export default {
   data() {
     return {
       form: {
-        startAddress: '',
-        endAddress: '',
-        departureTime: '',
-        availableSeats: 1,
-        price: 0,
-        additionalInfo: ''
-      }
+        seats: 1,
+        participants: []
+      },
+      isSubmitting: false
     };
   },
   async mounted() {
-    const rideId = this.$route.params.id;
+    const bookingId = this.$route.params.id;
     const token = localStorage.getItem('token');
-
     try {
-      const res = await fetch(`/api/rides/${rideId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+      const res = await fetch(`/api/bookings/${bookingId}`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
+      if (!res.ok) throw new Error('Errore nel caricamento della prenotazione');
+      const booking = await res.json();
 
-      if (!res.ok) throw new Error('Errore nel caricamento del viaggio');
-
-      const ride = await res.json();
-
-      this.form = {
-        startAddress: ride.startPoint.address,
-        endAddress: ride.endPoint.address,
-        departureTime: new Date(ride.departureTime).toISOString().slice(0, 16),
-        availableSeats: ride.availableSeats,
-        price: ride.price,
-        additionalInfo: ride.additionalInfo || ''
-      };
+      this.form.seats = booking.seats;
+      this.form.participants = booking.participants || [];
     } catch (err) {
-      console.error(err);
-      alert('Errore nel caricamento del viaggio.');
+      alert(err.message);
+      this.$router.push('/home/bookings');
     }
   },
   methods: {
     async submitForm() {
-      const rideId = this.$route.params.id;
+      this.isSubmitting = true;
+      const bookingId = this.$route.params.id;
       const token = localStorage.getItem('token');
 
       try {
-        const res = await fetch(`/api/rides/${rideId}`, {
+        const res = await fetch(`/api/bookings/${bookingId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
           },
-          body: JSON.stringify({
-            startAddress: this.form.startAddress,
-            endAddress: this.form.endAddress,
-            departureTime: this.form.departureTime,
-            availableSeats: this.form.availableSeats,
-            price: this.form.price,
-            additionalInfo: this.form.additionalInfo
-          })
+          body: JSON.stringify(this.form)
         });
-
         if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error || 'Errore nella modifica');
+          const errData = await res.json();
+          throw new Error(errData.error || 'Errore durante la modifica');
         }
-
-        alert('Viaggio aggiornato con successo!');
-        this.$router.push('/home/rides'); 
+        alert('Prenotazione aggiornata con successo!');
+        this.$router.push('/home/bookings');
       } catch (err) {
-        console.error(err);
-        alert('Errore durante il salvataggio.');
+        alert(err.message);
+      } finally {
+        this.isSubmitting = false;
       }
     }
   }
