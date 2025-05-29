@@ -1,8 +1,6 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
-    
+  <div class="min-h-screen bg-gray-100 flex flex-col">
     <header class="bg-white shadow p-4 flex justify-between items-center">
-      
       <nav class="space-x-4">
         <button @click="goToHome" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
           Home
@@ -10,9 +8,9 @@
         <button @click="goToEdit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
           Modifica dati
         </button>
-          <button @click="goToLanding" class="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800 transition">
+        <button @click="goToLanding" class="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800 transition">
           Viaggi Disponibili
-       </button>
+        </button>
         <button @click="goToSupport" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
           Supporto
         </button>
@@ -22,11 +20,10 @@
       </nav>
     </header>
 
-    
-    <main class="max-w-4xl mx-auto p-6 bg-white mt-6 rounded shadow">
-      <h1 class="text-4xl font-bold text-gray-700">Benvenuto, {{ user.name || user.username }}</h1>
-      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Dati personali:</h2>
-      <div class="space-y-2 text-gray-700">
+    <main class="flex-grow p-6 text-gray-800">
+      <h1 class="text-4xl font-bold mb-4">Benvenuto, {{ user.name || user.username }}</h1>
+      <h2 class="text-2xl font-semibold mb-4">Dati personali:</h2>
+      <div class="space-y-2">
         <p><strong>Username:</strong> {{ user.username }}</p>
         <p><strong>Nome:</strong> {{ user.name || '-' }}</p>
         <p><strong>Ruolo:</strong> {{ user.role }}</p>
@@ -34,10 +31,24 @@
         <p><strong>Valutazione:</strong> {{ user.rating }}</p>
         <p><strong>Autista:</strong> {{ user.isDriver ? 'Sì' : 'No' }}</p>
         <p><strong>Veicolo:</strong> {{ user.vehicle || 'Non specificato' }}</p>
+        <button @click="goToBookings" class="bg-purple-600 text-white py-3 px-4  rounded hover:bg-purple-700 transition text-lg">
+        Visualizza prenotazioni attive
+      </button>
       </div>
     </main>
+
+
+    <div v-if="user.isDriver" class="p-6 bg-white border-t shadow-inner">
+      <button @click="goToCreateRide" class="bg-purple-600 text-white py-3 px-4  rounded hover:bg-purple-700 transition text-lg">
+        Crea nuovo viaggio
+      </button>
+      <button @click="goToRides" class="bg-purple-600 text-white py-3 px-4  rounded hover:bg-purple-700 transition text-lg">
+        Visualizza i tuoi viaggi
+      </button>
+    </div>
   </div>
 </template>
+
 
 <script>
 export default {
@@ -82,8 +93,16 @@ export default {
     this.$router.push('/');
     },
     goToSupport() {
-      
-      this.$router.push('/support');
+    this.$router.push('/support');
+    },
+    goToCreateRide() {
+  this.$router.push('/home/create'); 
+    },
+    goToRides() {
+  this.$router.push('/home/rides'); 
+    },
+    goToBookings() {
+      this.$router.push('/home/bookings');
     },
     logout() {
       localStorage.removeItem('token');

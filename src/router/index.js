@@ -6,14 +6,28 @@ import EditProfile from '@/views/EditProfile.vue';
 import LandingView from '@/views/Landing.vue';
 import SupportView from '@/views/Support.vue';
 import AdminDashboard from '@/views/AdminDashboard.vue';
+import RideDetails from '../views/RideDetails.vue';
+import BookingView from '../views/Booking.vue';
+import AddRide from '@/views/AddRide.vue';
+import BookingList from '@/views/BookingList.vue';
+import RideList from '@/views/RideList.vue';
+import EditRide from '@/views/EditRide.vue';
+import EditBooking from '@/views/EditBooking.vue';
 
 const routes = [
   { path: '/register', component: RegisterView },
   { path: '/login', component: LoginView },
   { path: '/home', component: HomeView },
   { path: '/home/edit', component: EditProfile },
+  { path: '/home/create', component: AddRide },
+  { path: '/home/bookings', component: BookingList },
+  { path: '/home/bookings/edit/:id', component: EditBooking },
+  { path: '/home/rides', component: RideList },
+  { path: '/home/rides/edit/:id', component: EditRide },
   { path: '/support', component: SupportView },
   { path: '/', component: LandingView },
+  { path: '/:id', component: RideDetails },
+  { path: '/booking/:id', component: BookingView },
   { path: '/admin-dashboard', component: AdminDashboard, meta: { requiresAdmin: true }
 }
 ];
