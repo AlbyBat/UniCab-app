@@ -13,10 +13,12 @@ import BookingList from '@/views/BookingList.vue';
 import RideList from '@/views/RideList.vue';
 import EditRide from '@/views/EditRide.vue';
 import EditBooking from '@/views/EditBooking.vue';
+import AuthSuccess from '@/views/AuthSuccess.vue';
 
 const routes = [
   { path: '/register', component: RegisterView },
   { path: '/login', component: LoginView },
+  { path: '/auth-success',  component: AuthSuccess},
   { path: '/home', component: HomeView },
   { path: '/home/edit', component: EditProfile },
   { path: '/home/create', component: AddRide },
