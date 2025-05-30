@@ -42,7 +42,7 @@
             <p class="font-semibold mt-2">Prenotazioni:</p>
             <ul class="list-disc list-inside">
               <li
-                v-for="(booking, idx) in ride.bookings"
+                v-for="(booking, idx) in ride.bookings.filter(b => b.confirmed)"
                 :key="idx"
               >
                 {{ booking.userId?.name || 'Utente' }} - {{ booking.seats }} posto/i
@@ -67,7 +67,7 @@
               @click="manageBookings(ride._id)"
               class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
             >
-              Accetta prenotazioni
+              Gestisci prenotazioni
             </button>
           </div>
         </div>
@@ -137,7 +137,7 @@ export default {
       }
     },
     editRide(rideId) {
-      this.$router.push(`/home/rides/edit/${rideId}`);
+      this.$router.push(`/home/rides/${rideId}/edit`);
     },
     manageBookings(rideId) {
       this.$router.push(`/home/rides/${rideId}/bookings`);

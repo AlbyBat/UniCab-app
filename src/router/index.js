@@ -13,6 +13,7 @@ import BookingList from '@/views/BookingList.vue';
 import RideList from '@/views/RideList.vue';
 import EditRide from '@/views/EditRide.vue';
 import EditBooking from '@/views/EditBooking.vue';
+import AuthSuccess from '@/views/AuthSuccess.vue';
 
 const routes = [
   { path: '/register', component: RegisterView },
@@ -23,7 +24,8 @@ const routes = [
   { path: '/home/bookings', component: BookingList },
   { path: '/home/bookings/edit/:id', component: EditBooking },
   { path: '/home/rides', component: RideList },
-  { path: '/home/rides/edit/:id', component: EditRide },
+  { path: '/home/rides/:id/edit', component: EditRide },
+  { path: '/home/rides/:id/bookings', component: ManageBookings },
   { path: '/support', component: SupportView },
   { path: '/', component: LandingView },
   { path: '/:id', component: RideDetails },
