@@ -14,6 +14,9 @@
         <button @click="goToSupport" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
           Supporto
         </button>
+        <button @click="goToNotifications" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition">
+          Notifiche
+        </button>
         <button @click="logout" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
           Logout
         </button>
@@ -103,6 +106,9 @@ export default {
     },
     goToBookings() {
       this.$router.push('/home/bookings');
+    },
+    goToNotifications() {
+    this.$router.push('/home/notifications');
     },
     logout() {
       localStorage.removeItem('token');
