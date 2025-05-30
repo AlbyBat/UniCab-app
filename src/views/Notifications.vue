@@ -87,6 +87,11 @@ export default {
         console.error(err);
         alert('Errore nel marcare le notifiche come lette.');
       }
+    },
+    beforeRouteLeave(to, from, next) {
+      this.markAllAsRead().finally(() => {
+        next();
+      });
     }
   }
 };

@@ -76,8 +76,8 @@ export default {
         if (!res.ok) throw new Error('Errore nel rifiuto della prenotazione');
 
         this.bookings = this.bookings.filter(b => b._id !== bookingId);
-        alert(`Prenotazione rifiutata. Notifica inviata al'l\'utente'}.`);
-        //Qui potresti chiamare un endpoint per inviare una vera notifica/email
+        alert(`Prenotazione rifiutata. Notifica inviata all\'utente.`);
+        //dentro al delete
       } catch (err) {
         console.error(err);
         alert('Errore nel rifiuto della prenotazione.');
