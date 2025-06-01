@@ -83,7 +83,7 @@ export default {
           localStorage.setItem('token', data.token)
           const user = this.parseJwt(data.token)
           localStorage.setItem('user', JSON.stringify(user))
-          this.$router.push('/home')
+          this.$router.push(`/home/${user.userId}`)
         } else {
           this.errorMsg = data.message || 'Credenziali errate'
         }

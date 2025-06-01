@@ -16,12 +16,16 @@ import EditBooking from '@/views/EditBooking.vue';
 import AuthSuccess from '@/views/AuthSuccess.vue';
 import NotificationsView from '@/views/Notifications.vue';
 import ManageBookings from '@/views/ManageBookings.vue';
+import ReviewsList from '@/views/ReviewsList.vue';
+import ReportSubmitter from '@/views/ReportSubmitter.vue';
 
 const routes = [
   { path: '/register', component: RegisterView },
   { path: '/login', component: LoginView },
   { path: '/auth-success',  component: AuthSuccess},
-  { path: '/home', component: HomeView },
+  { path: '/home/:id', component: HomeView },
+  { path: '/home/:id/reviews', component: ReviewsList},
+  { path: '/home/:id/report', component: ReportSubmitter},
   { path: '/home/notifications', component: NotificationsView },  
   { path: '/home/edit', component: EditProfile },
   { path: '/home/create', component: AddRide },

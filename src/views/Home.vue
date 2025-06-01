@@ -5,26 +5,30 @@
         <button @click="goToHome" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
           Home
         </button>
-        <button @click="goToEdit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
+        <button v-if="isOwnProfile" @click="goToEdit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
           Modifica dati
         </button>
         <button @click="goToLanding" class="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800 transition">
           Viaggi Disponibili
         </button>
-        <button @click="goToSupport" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+        <button v-if="isOwnProfile" @click="goToSupport" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
           Supporto
         </button>
-        <button @click="goToNotifications" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition">
+        <button v-if="isOwnProfile" @click="goToNotifications" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition">
           Notifiche
         </button>
-        <button @click="logout" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+        <button v-if="isOwnProfile" @click="logout" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
           Logout
         </button>
       </nav>
     </header>
 
     <main class="flex-grow p-6 text-gray-800">
-      <h1 class="text-4xl font-bold mb-4">Benvenuto, {{ user.name || user.username }}</h1>
+      <h1 class="text-4xl font-bold mb-4">
+        <span v-if="isOwnProfile">Benvenuto, {{ user.name || user.username }}</span>
+        <span v-else>Stai visualizzando il profilo di {{ user.name || user.username }}</span>
+      </h1>
+
       <h2 class="text-2xl font-semibold mb-4">Dati personali:</h2>
       <div class="space-y-2">
         <p><strong>Username:</strong> {{ user.username }}</p>
@@ -34,85 +38,125 @@
         <p><strong>Valutazione:</strong> {{ user.rating }}</p>
         <p><strong>Autista:</strong> {{ user.isDriver ? 'Sì' : 'No' }}</p>
         <p><strong>Veicolo:</strong> {{ user.vehicle || 'Non specificato' }}</p>
-        <button @click="goToBookings" class="bg-purple-600 text-white py-3 px-4  rounded hover:bg-purple-700 transition text-lg">
-        Visualizza prenotazioni attive
-      </button>
+
+        <div v-if="isOwnProfile">
+          <button @click="goToBookings" class="bg-purple-600 text-white py-3 px-4 rounded hover:bg-purple-700 transition text-lg">
+            Visualizza prenotazioni attive
+          </button>
+        </div>
+
+        <div v-else>
+          <button @click="reportUser" class="bg-red-600 text-white py-3 px-4 rounded hover:bg-red-700 transition text-lg">
+            Segnala
+          </button>
+        </div>
+
+        <button @click="viewReviews" class="bg-blue-600 text-white py-3 px-4 rounded hover:bg-blue-700 transition text-lg">
+            Visualizza recensioni
+          </button>
       </div>
     </main>
 
 
-    <div v-if="user.isDriver" class="p-6 bg-white border-t shadow-inner">
-      <button @click="goToCreateRide" class="bg-purple-600 text-white py-3 px-4  rounded hover:bg-purple-700 transition text-lg">
+    <div v-if="isOwnProfile && user.isDriver" class="p-6 bg-white border-t shadow-inner">
+      <button @click="goToCreateRide" class="bg-purple-600 text-white py-3 px-4 rounded hover:bg-purple-700 transition text-lg">
         Crea nuovo viaggio
       </button>
-      <button @click="goToRides" class="bg-purple-600 text-white py-3 px-4  rounded hover:bg-purple-700 transition text-lg">
+      <button @click="goToRides" class="bg-purple-600 text-white py-3 px-4 rounded hover:bg-purple-700 transition text-lg">
         Visualizza i tuoi viaggi
       </button>
     </div>
   </div>
 </template>
 
-
 <script>
 export default {
+  props: ['userId'],
   data() {
     return {
       user: {},
+      isOwnProfile: false
     };
   },
   async created() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      this.$router.push('/login');
-      return;
-    }
+  const token = localStorage.getItem('token');
+  const localUser = JSON.parse(localStorage.getItem('user'));
 
-    try {
-      const res = await fetch('/api/home', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+  if (!token || !localUser) {
+    this.$router.push('/login');
+    return;
+  }
 
-      if (!res.ok) throw new Error('Errore nel caricamento utente');
+  const routeId = this.$route.params.id;
 
-      const data = await res.json();
-      this.user = data.user || {};
-    } catch (err) {
-      console.error(err);
-      alert('Sessione scaduta, effettua nuovamente il login');
-      localStorage.removeItem('token');
-      this.$router.push('/login');
-    }
-  },
+  try {
+    const res = await fetch(`/api/users/${routeId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) throw new Error('Errore nel caricamento utente');
+
+    const data = await res.json();
+    this.user = data;
+    this.isOwnProfile = localUser.userId === routeId;
+  } catch (err) {
+    console.error(err);
+    alert('Errore nel caricamento utente');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    this.$router.push('/login');
+  }
+},
+  watch: {
+  '$route.params.id'(newId) {
+    const localUser = JSON.parse(localStorage.getItem('user'));
+    this.isOwnProfile = localUser.userId === newId;
+  }
+},
   methods: {
     goToEdit() {
       this.$router.push('/home/edit');
     },
     goToHome() {
-      this.$router.push('/home');
+      const localUser = JSON.parse(localStorage.getItem('user'));
+      if (localUser?.userId) {
+        this.$router.push(`/home/${localUser.userId}`);
+      } else {
+        this.$router.push('/login');
+      }
     },
     goToLanding() {
-    this.$router.push('/');
+      this.$router.push('/');
     },
     goToSupport() {
-    this.$router.push('/support');
+      this.$router.push('/support');
     },
     goToCreateRide() {
-  this.$router.push('/home/create'); 
+      this.$router.push('/home/create');
     },
     goToRides() {
-  this.$router.push('/home/rides'); 
+      this.$router.push('/home/rides');
     },
     goToBookings() {
       this.$router.push('/home/bookings');
     },
     goToNotifications() {
-    this.$router.push('/home/notifications');
+      this.$router.push('/home/notifications');
     },
     logout() {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       this.$router.push('/login');
+    },
+    viewReviews() {
+      const userId = this.$route.params.userId || this.user._id; 
+      this.$router.push(`/home/${userId}/reviews`);
+    },
+    reportUser() {
+      const userId = this.$route.params.userId || this.user._id; 
+      this.$router.push(`/home/${userId}/report`);
     }
   }
 };

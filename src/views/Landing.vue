@@ -5,7 +5,7 @@
         <h1 class="text-4xl"> UniCab</h1>
       </div>
       <div class="nav-right">
-        <router-link to="/home" class="nav-button">Home</router-link>
+        <router-link :to="`/home/${userId}`" class="nav-button">Home</router-link>
         <router-link to="/register" class="nav-button join-btn">Unisciti</router-link>
         <router-link to="/support" class="nav-button">Supporto</router-link>
       </div>
@@ -43,6 +43,12 @@ export default {
     return {
       rides: []
     };
+  },
+  computed: {
+    userId() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      return user?.userId || '';
+    }
   },
   async created() {
     try {
