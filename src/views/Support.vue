@@ -59,7 +59,12 @@ export default {
       this.form.message = '';
     },
     goToHome() {
-      this.$router.push('/home');
+      const localUser = JSON.parse(localStorage.getItem('user'));
+      if (localUser?.userId) {
+        this.$router.push(`/home/${localUser.userId}`);
+      } else {
+        this.$router.push('/login');
+      }
     },
     goToEdit() {
       this.$router.push('/home/edit');

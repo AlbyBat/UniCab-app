@@ -38,7 +38,12 @@ export default {
   name: 'AdminDashboard',
   methods: {
     goToHome() {
-      window.location.href = '/home';
+      const localUser = JSON.parse(localStorage.getItem('user'));
+      if (localUser?.userId) {
+        this.$router.push(`/home/${localUser.userId}`);
+      } else {
+        this.$router.push('/login');
+      }
     },
     logout() {
       localStorage.removeItem('token');

@@ -146,7 +146,12 @@ export default {
       this.$router.push('/home/edit');
     },
     goToHome() {
-      this.$router.push('/home');
+      const localUser = JSON.parse(localStorage.getItem('user'));
+      if (localUser?.userId) {
+        this.$router.push(`/home/${localUser.userId}`);
+      } else {
+        this.$router.push('/login');
+      }
     },
     goToLanding() {
     this.$router.push('/');
