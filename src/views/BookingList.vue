@@ -37,13 +37,16 @@
           <p><strong>Autista:</strong> {{ ride.driver?.name || 'N/A' }}</p>
 
           <div
-            v-for="(booking, idx) in ride.bookings"
-            :key="idx"
-            class="mt-2 pl-4 border-l-4 border-blue-500"
-          >
+              v-for="(booking, idx) in ride.bookings"
+              :key="idx"
+              :class="[
+                'mt-2 pl-4 border-l-4',
+                isPastRide(ride.departureTime) ? 'bg-green-100 border-green-500' : 'border-blue-500'
+              ]"
+            >
             <p><strong>Posti prenotati:</strong> {{ booking.seats }}</p>
             
-            <div class="mt-2 space-x-2">
+            <div class="mt-2 space-x-2" >
               <button 
                 @click="deleteBooking(booking._id)" 
                 class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
@@ -56,6 +59,9 @@
               >
                 Modifica
               </button>
+            </div>
+            <div v-if="isPastRide(ride.departureTime) && !hasAlreadyReviewed(ride._id)">
+              <button @click="showReviewFormFor = ride._id">Scrivi recensione</button>
             </div>
           </div>
         </div>
@@ -70,9 +76,15 @@ export default {
     return {
       rides: [],
       loading: true,
+      reviewedDrivers: new Set(), // per tenere traccia degli autisti già recensiti
+      showReviewFormFor: null,    // rideId per cui mostrare il form
+      reviewText: '',
+      reviewRating: 5
     };
   },
   async created() {
+    const saved = localStorage.getItem('reviewedRides');
+    this.reviewedRides = saved ? JSON.parse(saved) : [];
     try {
       const token = localStorage.getItem('token');
       const res = await fetch('/api/bookings/my-bookings', {
@@ -105,6 +117,33 @@ export default {
         hour: '2-digit',
         minute: '2-digit'
       });
+    },
+    hasAlreadyReviewed(rideId) {
+      // Controllo locale, può essere in data o localStorage
+      return this.reviewedRides.includes(rideId);
+    },
+    isPastRide(departureTime) {
+      const now = new Date();
+      return new Date(departureTime) < now;
+    },
+    async submitReview(ride) {
+      await fetch(`/api/ratings/${ride.driver._id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          descrizione: this.reviewText,
+          rating: this.reviewRating
+        })
+      });
+
+      // Salva che è stata recensita (es: array locale)
+      this.reviewedRides.push(ride._id);
+
+      // (opzionale) Persisti su localStorage
+      localStorage.setItem('reviewedRides', JSON.stringify(this.reviewedRides));
     },
     async editBooking(bookingId){
       this.$router.push(`/home/bookings/edit/${bookingId}`);

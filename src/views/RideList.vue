@@ -28,10 +28,13 @@
       </div>
       <div v-else class="space-y-6">
         <div
-          v-for="ride in rides"
-          :key="ride._id"
-          class="p-4 bg-gray-50 border rounded shadow-sm"
-        >
+            v-for="ride in rides"
+            :key="ride._id"
+            :class="[
+              'p-4 border rounded shadow-sm',
+              ride.status === 'completed' ? 'bg-green-100' : 'bg-gray-50'
+            ]"
+          >
           <p class="text-lg font-semibold">
             Da {{ ride.startPoint.address }} a {{ ride.endPoint.address }}
           </p>
@@ -48,28 +51,38 @@
                 {{ booking.userId?.name || 'Utente' }} - {{ booking.seats }} posto/i
               </li>
             </ul>
+            <p v-if="ride.status === 'completed'" class="text-green-800 font-bold mt-2">
+              Viaggio completato
+            </p>
           </div>
 
-          <div class="mt-4 space-x-2">
-            <button
-              @click="deleteRide(ride._id)"
-              class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
-            >
-              Elimina
-            </button>
-            <button
-              @click="editRide(ride._id)"
-              class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
-            >
-              Modifica
-            </button>
-            <button
-              @click="manageBookings(ride._id)"
-              class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
-            >
-              Gestisci prenotazioni
-            </button>
-          </div>
+        <div class="mt-4 space-x-2" v-if="ride.status !== 'completed'">
+          <button
+            @click="deleteRide(ride._id)"
+            class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+          >
+            Elimina
+          </button>
+          <button
+            @click="editRide(ride._id)"
+            class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
+          >
+            Modifica
+          </button>
+          <button
+            @click="manageBookings(ride._id)"
+            class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
+          >
+            Gestisci prenotazioni
+          </button>
+          <button
+            v-if="canShowCompleteButton(ride)"
+            @click="completeRide(ride._id)"
+            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            Segna come completato
+          </button>
+        </div>
         </div>
       </div>
     </div>
@@ -115,6 +128,17 @@ export default {
         minute: '2-digit'
       });
     },
+    canShowCompleteButton(ride) {
+      if (ride.status !== 'active') return false;
+
+      const now = new Date();
+      const departure = new Date(ride.departureTime);
+
+      const diffInMs = now - departure;
+      const diffInHours = diffInMs / (1000 * 60 * 60);
+
+      return diffInHours >= 1;
+    },
     async deleteRide(rideId) {
       if (!confirm('Sei sicuro di voler eliminare questo viaggio?')) return;
 
@@ -134,6 +158,26 @@ export default {
       } catch (err) {
         console.error(err);
         alert('Errore durante l\'eliminazione del viaggio.');
+      }
+    },
+    async completeRide(rideId) {
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch(`/api/rides/complete/${rideId}`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Errore');
+
+        alert(data.message);
+        /*const ride = this.rides.find(r => r._id === rideId);
+        if (ride) ride.status = 'completed';*/
+      } catch (err) {
+        alert('Errore nel completamento del viaggio');
       }
     },
     editRide(rideId) {
