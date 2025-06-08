@@ -51,11 +51,34 @@
                 {{ booking.userId?.name || 'Utente' }} - {{ booking.seats }} posto/i
               </li>
             </ul>
-            <p v-if="ride.status === 'completed'" class="text-green-800 font-bold mt-2">
-              Viaggio completato
-            </p>
           </div>
-
+        <div v-if="ride.status === 'completed' && ride.bookings?.length">
+          <p class="font-semibold mt-4 text-gray-700">Scrivi recensione ai passeggeri:</p>
+          <ul class="space-y-2 mt-2">
+          <li
+            v-for="booking in ride.bookings"
+            :key="booking._id"
+          >
+            <div
+              v-if="Array.isArray(booking.participants)"
+              v-for="participant in booking.participants"
+              :key="participant.userId?._id"
+              v-show="participant?.confirmed && participant?.userId"
+              class="flex justify-between items-center bg-gray-100 p-2 rounded"
+            >
+              <span>{{ participant.userId.name }}</span>
+              <button
+                v-if="!isReviewed(ride._id, participant.userId._id)"
+                @click="goToReviewUser(ride._id, participant.userId._id)"
+                class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+              >
+                Scrivi recensione
+              </button>
+               <span v-else class="text-gray-500 italic">Recensione inviata</span>
+            </div>
+          </li>
+          </ul>
+        </div>
         <div class="mt-4 space-x-2" v-if="ride.status !== 'completed'">
           <button
             @click="deleteRide(ride._id)"
@@ -95,6 +118,7 @@ export default {
     return {
       rides: [],
       loading: true,
+      reviewedUsersByRide: {},  //{ rideId: [userId1, userId2, ...] }
     };
   },
   async created() {
@@ -110,12 +134,14 @@ export default {
       if (!res.ok) throw new Error('Errore nel recupero dei viaggi da autista');
 
       this.rides = await res.json();
+      await this.fetchReviewedUsers();
     } catch (err) {
       console.error(err);
       alert('Errore durante il caricamento dei tuoi viaggi.');
     } finally {
       this.loading = false;
     }
+    this.handleReturnFromReview();
   },
   methods: {
     formatDate(date) {
@@ -127,6 +153,17 @@ export default {
         hour: '2-digit',
         minute: '2-digit'
       });
+    },
+    isReviewed(rideId, userId) {
+      return this.reviewedUsersByRide[rideId]?.includes(userId);
+    },
+    markReviewed(rideId, userId) {
+      if (!this.reviewedUsersByRide[rideId]) {
+        this.reviewedUsersByRide[rideId] = [];
+      }
+      if (!this.reviewedUsersByRide[rideId].includes(userId)) {
+        this.reviewedUsersByRide[rideId].push(userId);
+      }
     },
     canShowCompleteButton(ride) {
       if (ride.status !== 'active') return false;
@@ -174,11 +211,30 @@ export default {
         if (!res.ok) throw new Error(data.error || 'Errore');
 
         alert(data.message);
-        /*const ride = this.rides.find(r => r._id === rideId);
-        if (ride) ride.status = 'completed';*/
+        const ride = this.rides.find(r => r._id === rideId);
+        if (ride) ride.status = 'completed';
       } catch (err) {
         alert('Errore nel completamento del viaggio');
       }
+    },
+    async fetchReviewedUsers() {
+      const token = localStorage.getItem('token');
+      const promises = this.rides.map(async (ride) => {
+        const res = await fetch(`/api/ratings/my-reviewed-passengers/${ride._id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return { rideId: ride._id, reviewedUserIds: data.reviewedUserIds };
+        } else {
+          return { rideId: ride._id, reviewedUserIds: [] };
+        }
+      });
+
+      const results = await Promise.all(promises);
+      results.forEach(({ rideId, reviewedUserIds }) => {
+        this.reviewedUsersByRide[rideId] = reviewedUserIds;
+      });
     },
     editRide(rideId) {
       this.$router.push(`/home/rides/${rideId}/edit`);
@@ -188,6 +244,19 @@ export default {
     },
     goToEdit() {
       this.$router.push('/home/edit');
+    },
+    goToReviewUser(rideId, userId) {
+       this.$router.push({
+          path: `/home/rides/${rideId}/review/${userId}`,
+          query: { role: 'driver' }  // 👈 qui sei autista
+        });
+    },
+     handleReturnFromReview() {
+      const { reviewedRideId, reviewedUserId } = this.$route.query;
+      if (reviewedRideId && reviewedUserId) {
+        this.markReviewed(reviewedRideId, reviewedUserId);
+        this.$router.replace({ path: this.$route.path, query: {} });
+      }
     },
     goToHome() {
       const localUser = JSON.parse(localStorage.getItem('user'));

@@ -30,7 +30,10 @@
         <div
           v-for="ride in rides"
           :key="ride._id"
-          class="p-4 bg-gray-50 border rounded shadow-sm"
+          :class="[
+              'p-4 border rounded shadow-sm',
+              ride.status === 'completed' ? 'bg-green-100' : 'bg-gray-50'
+            ]"
         >
           <p class="text-lg font-semibold">Viaggio da {{ ride.startPoint.address }} a {{ ride.endPoint.address }}</p>
           <p><strong>Data e ora:</strong> {{ formatDate(ride.departureTime) }}</p>
@@ -46,24 +49,34 @@
             >
             <p><strong>Posti prenotati:</strong> {{ booking.seats }}</p>
             
-            <div class="mt-2 space-x-2" >
-              <button 
-                @click="deleteBooking(booking._id)" 
-                class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
-              >
-                Cancella
-              </button>
-              <button 
-                @click="editBooking(booking._id)" 
-                class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
-              >
-                Modifica
-              </button>
-            </div>
-            <div v-if="isPastRide(ride.departureTime) && !hasAlreadyReviewed(ride._id)">
-              <button @click="showReviewFormFor = ride._id">Scrivi recensione</button>
-            </div>
+          <div class="mt-2 space-x-2" v-if="ride.status !== 'completed' && ride.status !== 'active'">
+            <button 
+              @click="deleteBooking(booking._id)" 
+              class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+            >
+              Cancella
+            </button>
+            <button 
+              @click="editBooking(booking._id)" 
+              class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
+            >
+              Modifica
+            </button>
+          </div>       
           </div>
+            <div v-if="ride.status === 'completed'">
+              <div v-if="!hasAlreadyReviewed(ride._id)">
+                <button 
+                  @click="goToReviewUser(ride._id, ride.driver._id)"
+                  class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+                >
+                  Scrivi recensione
+                </button>
+              </div>
+              <div v-else class="text-gray-500 italic">
+                Recensione già inviata
+              </div>
+            </div>
         </div>
       </div>
     </div>
@@ -76,10 +89,9 @@ export default {
     return {
       rides: [],
       loading: true,
-      reviewedDrivers: new Set(), // per tenere traccia degli autisti già recensiti
-      showReviewFormFor: null,    // rideId per cui mostrare il form
       reviewText: '',
-      reviewRating: 5
+      reviewRating: 5,
+      reviewedUsersByRide: {},  //{ rideId: [userId1, userId2, ...] }
     };
   },
   async created() {
@@ -88,8 +100,8 @@ export default {
     try {
       const token = localStorage.getItem('token');
       const res = await fetch('/api/bookings/my-bookings', {
+        method: 'GET',
         headers: {
-          method: 'GET',
           Authorization: `Bearer ${token}`
         }
       });
@@ -99,12 +111,15 @@ export default {
       }
 
       this.rides = await res.json();
+      await this.fetchReviewedUsers();
+      
     } catch (err) {
       console.error(err);
       alert('Errore nel caricamento delle prenotazioni.');
     } finally {
       this.loading = false;
     }
+    this.handleReturnFromReview();
   },
   methods: {
     formatDate(date) {
@@ -118,35 +133,48 @@ export default {
         minute: '2-digit'
       });
     },
+    goToReviewUser(rideId, userId) {
+       this.$router.push({
+          path: `/home/rides/${rideId}/review/${userId}`,
+          query: { role: 'passenger' }  // 👈 qui sei autista
+        });
+    },
+    handleReturnFromReview() {
+      const { reviewedRideId } = this.$route.query;
+      if (reviewedRideId) {
+        this.reviewedRides.push(reviewedRideId);
+        localStorage.setItem('reviewedRides', JSON.stringify(this.reviewedRides));
+        this.$router.replace({ path: this.$route.path, query: {} });
+      }
+    },
     hasAlreadyReviewed(rideId) {
-      // Controllo locale, può essere in data o localStorage
       return this.reviewedRides.includes(rideId);
     },
     isPastRide(departureTime) {
       const now = new Date();
       return new Date(departureTime) < now;
     },
-    async submitReview(ride) {
-      await fetch(`/api/ratings/${ride.driver._id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          descrizione: this.reviewText,
-          rating: this.reviewRating
-        })
-      });
-
-      // Salva che è stata recensita (es: array locale)
-      this.reviewedRides.push(ride._id);
-
-      // (opzionale) Persisti su localStorage
-      localStorage.setItem('reviewedRides', JSON.stringify(this.reviewedRides));
-    },
     async editBooking(bookingId){
       this.$router.push(`/home/bookings/edit/${bookingId}`);
+    },
+    async fetchReviewedUsers() {
+      const token = localStorage.getItem('token');
+      const promises = this.rides.map(async (ride) => {
+        const res = await fetch(`/api/ratings/my-reviewed-passengers/${ride._id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return { rideId: ride._id, reviewedUserIds: data.reviewedUserIds };
+        } else {
+          return { rideId: ride._id, reviewedUserIds: [] };
+        }
+      });
+
+      const results = await Promise.all(promises);
+      results.forEach(({ rideId, reviewedUserIds }) => {
+        this.reviewedUsersByRide[rideId] = reviewedUserIds;
+      });
     },
     async deleteBooking(bookingId){
       const token = localStorage.getItem('token');

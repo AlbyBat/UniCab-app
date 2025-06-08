@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white border rounded p-4 shadow space-y-4">
     <h3 class="text-lg font-semibold text-gray-700">Scrivi una recensione</h3>
-    
+
     <textarea
       v-model="descrizione"
       placeholder="Scrivi la tua recensione..."
@@ -11,9 +11,17 @@
 
     <div class="flex items-center space-x-2">
       <label class="text-sm text-gray-600">Valutazione:</label>
-      <select v-model.number="rating" class="border p-1 rounded">
-        <option v-for="n in 5" :key="n" :value="n">{{ n }} ⭐</option>
-      </select>
+      <div class="flex space-x-1">
+        <span
+          v-for="n in 5"
+          :key="n"
+          @click="rating = n"
+          class="cursor-pointer text-2xl"
+          :class="n <= rating ? 'text-yellow-400' : 'text-gray-300'"
+        >
+          ★
+        </span>
+      </div>
     </div>
 
     <button
@@ -31,12 +39,6 @@
 
 <script>
 export default {
-  props: {
-    destinationUserId: {
-      type: String,
-      required: true // l'id dell'autista da recensire
-    }
-  },
   data() {
     return {
       descrizione: '',
@@ -46,8 +48,19 @@ export default {
       errorMessage: ''
     };
   },
+  computed: {
+    rideId() {
+      return this.$route.params.rideId;
+    },
+    destinationUserId() {
+      return this.$route.params.userId;
+    },
+    role() {
+      return this.$route.query.role || 'passenger';
+    }
+  },
   methods: {
-    async submitReview() {
+     async submitReview() {
       this.loading = true;
       this.successMessage = '';
       this.errorMessage = '';
@@ -62,7 +75,8 @@ export default {
           },
           body: JSON.stringify({
             descrizione: this.descrizione,
-            rating: this.rating
+            rating: this.rating,
+            ride: this.rideId 
           })
         });
 
@@ -76,15 +90,26 @@ export default {
         this.descrizione = '';
         this.rating = 5;
 
-        // Emissione evento per genitore (opzionale)
         this.$emit('review-submitted');
-
       } catch (err) {
         console.error(err);
         this.errorMessage = err.message || 'Errore imprevisto';
       } finally {
         this.loading = false;
       }
+
+      if (this.role === 'passenger') {
+        this.$router.push({
+          path: '/home/bookings',
+          query: { reviewedRideId: this.rideId, reviewedUserId: this.destinationUserId }
+        });
+      } else {
+        this.$router.push({
+          path: '/home/rides',
+          query: { reviewedRideId: this.rideId, reviewedUserId: this.destinationUserId }
+        });
+      }
+
     }
   }
 };

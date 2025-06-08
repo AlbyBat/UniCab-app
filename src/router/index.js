@@ -18,6 +18,7 @@ import NotificationsView from '@/views/Notifications.vue';
 import ManageBookings from '@/views/ManageBookings.vue';
 import ReviewsList from '@/views/ReviewsList.vue';
 import ReportSubmitter from '@/views/ReportSubmitter.vue';
+import ReviewSubmitter from '@/views/ReviewSubmitter.vue';
 
 const routes = [
   { path: '/register', component: RegisterView },
@@ -34,6 +35,7 @@ const routes = [
   { path: '/home/rides', component: RideList },
   { path: '/home/rides/:id/edit', component: EditRide },
   { path: '/home/rides/:id/bookings', component: ManageBookings },
+  { path: `/home/rides/:rideId/review/:userId`, component: ReviewSubmitter, props: true },
   { path: '/support', component: SupportView },
   { path: '/', component: LandingView },
   { path: '/:id', component: RideDetails },
