@@ -18,11 +18,11 @@ onMounted(() => {
       router.push('/login')
       return
     }
-
     const localUser = JSON.parse(localStorage.getItem('user'))
     if (localUser?.userId) {
       router.push(`/home/${localUser.userId}`)  
     } else {
+      this.$router.push('/login');
       router.push('/login')
     }
   } else {

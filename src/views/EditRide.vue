@@ -102,7 +102,7 @@ export default {
     this.form = {
       startAddress: ride.startPoint.address,
       endAddress: ride.endPoint.address,
-      departureTime: new Date(ride.departureTime).toISOString().slice(0, 16),
+      departureTime: this.toLocalDatetimeInput(ride.departureTime),
       availableSeats: ride.availableSeats,
       price: ride.price,
       additionalInfo: ride.additionalInfo || ''
@@ -114,6 +114,12 @@ export default {
     }
   },
   methods: {
+    toLocalDatetimeInput(isoString) {
+      const date = new Date(isoString); //per correggere il -2 del fuso orario del db
+      const offset = date.getTimezoneOffset();
+      const localDate = new Date(date.getTime() - offset * 60000);
+      return localDate.toISOString().slice(0, 16);
+    },
     async updateMap() {
       if (!this.map) return;
       try {

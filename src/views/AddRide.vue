@@ -18,7 +18,7 @@
 
           <div>
             <label class="block font-semibold">Data e ora di partenza</label>
-            <input v-model="form.departureTime" type="datetime-local" class="w-full border p-2 rounded" required />
+            <input v-model="form.departureTime" type="datetime-local" class="w-full border p-2 rounded" :min="minDateTime" required />
           </div>
 
           <div>
@@ -92,6 +92,13 @@ export default {
       this.debouncedUpdateMap();
     }
   },
+  computed: {
+    minDateTime() {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // correzione fuso orario per HTML input
+      return now.toISOString().slice(0, 16); // formato richiesto da input datetime-local
+    }
+  },
   methods: {
     async updateMap() {
       if (!this.form.startAddress || !this.form.endAddress) return;
@@ -135,6 +142,14 @@ export default {
       const token = localStorage.getItem('token');
 
       try {
+        const selectedTime = new Date(this.form.departureTime);
+        const now = new Date();
+        if (selectedTime <= now) {
+          alert('La data e ora di partenza devono essere nel futuro.');
+          this.isSubmitting = false;
+          return;
+        }
+
         const startCoordinates = await this.geocodeAddress(this.form.startAddress);
         const endCoordinates = await this.geocodeAddress(this.form.endAddress);
 
