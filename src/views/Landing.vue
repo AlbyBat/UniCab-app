@@ -52,7 +52,7 @@ export default {
   },
   async created() {
     try {
-      await fetch('/api/rides/refresh-status',{
+      await fetch('/api/rides/refresh-status', {
         method: 'PATCH',
       });
       const res = await fetch('/api/rides');

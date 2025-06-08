@@ -13,7 +13,6 @@ onMounted(() => {
       const user = JSON.parse(atob(token.split('.')[1]))
       localStorage.setItem('user', JSON.stringify(user))
     } catch {
-      //se non corretto allora riporta al login
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       router.push('/login')
