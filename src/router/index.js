@@ -19,6 +19,9 @@ import ManageBookings from '@/views/ManageBookings.vue';
 import ReviewsList from '@/views/ReviewsList.vue';
 import ReportSubmitter from '@/views/ReportSubmitter.vue';
 import ReviewSubmitter from '@/views/ReviewSubmitter.vue';
+import AdminUsers from '@/views/AdminUsers.vue';
+import AdminRides from '@/views/AdminRides.vue';
+import AdminReports from '@/views/AdminReports.vue';
 
 const routes = [
   { path: '/register', component: RegisterView },
@@ -40,7 +43,10 @@ const routes = [
   { path: '/', component: LandingView },
   { path: '/:id', component: RideDetails },
   { path: '/booking/:id', component: BookingView },
-  { path: '/admin-dashboard', component: AdminDashboard, meta: { requiresAdmin: true }
+  { path: '/admin', component: AdminDashboard, meta: { requiresAdmin: true }},
+  { path: '/admin/users', component: AdminUsers, meta: { requiresAdmin: true }},
+  { path: '/admin/rides', component: AdminRides, meta: { requiresAdmin: true }},
+  { path: '/admin/reports', component: AdminReports, meta: { requiresAdmin: true },
 }
 ];
 
