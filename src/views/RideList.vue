@@ -66,7 +66,12 @@
               v-show="participant?.confirmed && participant?.userId"
               class="flex justify-between items-center bg-gray-100 p-2 rounded"
             >
-              <span>{{ participant.userId.name }}</span>
+              <span
+                @click="goToUserHome(participant.userId._id)"
+                class="text-blue-600 hover:underline cursor-pointer"
+              >
+                {{ participant.userId.name }}
+              </span>
               <button
                 v-if="!isReviewed(ride._id, participant.userId._id)"
                 @click="goToReviewUser(ride._id, participant.userId._id)"
@@ -268,6 +273,9 @@ export default {
     },
     goToLanding() {
     this.$router.push('/');
+    },
+    goToUserHome(userId) {
+      this.$router.push(`/home/${userId}`);
     },
     goToSupport() {
     this.$router.push('/support');
