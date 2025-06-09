@@ -18,20 +18,20 @@
     <section class="bg-white p-6 rounded shadow-md max-w-2xl mx-auto">
       <h2 class="text-2xl font-semibold mb-4 text-gray-800">Hai bisogno di aiuto?</h2>
       <p class="text-gray-700 mb-4">
-        Se hai problemi con l'app o vuoi segnalare un errore, scrivici compilando il modulo qui sotto o inviaci un'email.
+        Se hai problemi con l'app o vuoi segnalare un errore, scrivici compilando il modulo qui sotto.
       </p>
 
       <form @submit.prevent="submitSupportRequest" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700">Email</label>
-          <input v-model="form.email" type="email" required class="w-full p-2 border rounded" />
-        </div>
-        <div>
           <label class="block text-sm font-medium text-gray-700">Messaggio</label>
           <textarea v-model="form.message" required rows="5" class="w-full p-2 border rounded"></textarea>
         </div>
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-          Invia richiesta
+        <button
+          type="submit"
+          :disabled="isSubmitting"
+          class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition disabled:opacity-50"
+        >
+          {{ isSubmitting ? 'Invio in corso...' : 'Invia richiesta' }}
         </button>
       </form>
 
@@ -45,18 +45,35 @@ export default {
   data() {
     return {
       form: {
-        email: '',
         message: ''
       },
-      successMessage: ''
+      successMessage: '',
+      isSubmitting: false
     };
   },
   methods: {
-    submitSupportRequest() {
-      // qui backend
-      this.successMessage = 'La tua richiesta è stata inviata con successo!';
-      this.form.email = '';
-      this.form.message = '';
+    async submitSupportRequest() {
+      try {
+        this.isSubmitting = true;
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/tickets', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ message: this.form.message })
+        });
+        if (!res.ok) throw new Error('Errore nell\'invio della richiesta');
+        this.successMessage = 'La tua richiesta è stata inviata con successo!';
+        this.form.message = '';
+        setTimeout(() => {
+          this.isSubmitting = false;
+          this.goToHome();
+      }, 3500);
+      } catch (err) {
+        alert(err.message);
+      }
     },
     goToHome() {
       const localUser = JSON.parse(localStorage.getItem('user'));
@@ -65,9 +82,6 @@ export default {
       } else {
         this.$router.push('/login');
       }
-    },
-    goToEdit() {
-      this.$router.push('/home/edit');
     },
     goToLanding() {
       this.$router.push('/');

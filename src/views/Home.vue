@@ -79,43 +79,47 @@ export default {
     };
   },
   async created() {
-  const token = localStorage.getItem('token');
-  const localUser = JSON.parse(localStorage.getItem('user'));
-
-  if (!token || !localUser) {
-    this.$router.push('/login');
-    return;
-  }
-
-  const routeId = this.$route.params.id;
-
-  try {
-    const res = await fetch(`/api/users/${routeId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    if (!res.ok) throw new Error('Errore nel caricamento utente');
-
-    const data = await res.json();
-    this.user = data;
-    this.isOwnProfile = localUser.userId === routeId;
-  } catch (err) {
-    console.error(err);
-    alert('Errore nel caricamento utente');
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    this.$router.push('/login');
-  }
+    await this.fetchUserData();
 },
   watch: {
-  '$route.params.id'(newId) {
-    const localUser = JSON.parse(localStorage.getItem('user'));
-    this.isOwnProfile = localUser.userId === newId;
+  '$route.params.id': {
+    immediate: true,
+    handler(newId) {
+      const localUser = JSON.parse(localStorage.getItem('user'));
+      this.isOwnProfile = localUser.userId === newId;
+      this.fetchUserData();
+    }
   }
 },
   methods: {
+    async fetchUserData() {
+      const token = localStorage.getItem('token');
+      const localUser = JSON.parse(localStorage.getItem('user'));
+      const routeId = this.$route.params.id;
+
+      if (!token || !localUser) {
+        this.$router.push('/login');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/users/${routeId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (!res.ok) throw new Error('Errore nel caricamento utente');
+
+        const data = await res.json();
+        this.user = data;
+        this.isOwnProfile = localUser.userId === routeId;
+      } catch (err) {
+        console.error(err);
+        alert('Errore nel caricamento utente');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        this.$router.push('/login');
+      }
+    },
     goToEdit() {
       this.$router.push('/home/edit');
     },
@@ -123,6 +127,7 @@ export default {
       const localUser = JSON.parse(localStorage.getItem('user'));
       if (localUser?.userId) {
         this.$router.push(`/home/${localUser.userId}`);
+        
       } else {
         this.$router.push('/login');
       }

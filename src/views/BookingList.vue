@@ -37,8 +37,12 @@
         >
           <p class="text-lg font-semibold">Viaggio da {{ ride.startPoint.address }} a {{ ride.endPoint.address }}</p>
           <p><strong>Data e ora:</strong> {{ formatDate(ride.departureTime) }}</p>
-          <p><strong>Autista:</strong> {{ ride.driver?.name || 'N/A' }}</p>
-
+          <p><strong>Autista:</strong>   <span
+                @click="goToUserHome(ride.driver?._id)"
+                class="text-blue-600 hover:underline cursor-pointer"
+              >
+                {{ ride.driver?.name }}
+              </span></p>
           <div
               v-for="(booking, idx) in ride.bookings"
               :key="idx"
@@ -210,6 +214,9 @@ export default {
       } else {
         this.$router.push('/login');
       }
+    },
+    goToUserHome(userId) {
+      this.$router.push(`/home/${userId}`);
     },
     goToLanding() {
     this.$router.push('/');
