@@ -32,6 +32,12 @@ export default {
       const user = JSON.parse(localStorage.getItem('user'));
       return user?.userId || '';
     }
+  },
+  mounted() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || !user.userId) {
+      this.$router.push('/login');
+    }
   }
 };
 </script>
