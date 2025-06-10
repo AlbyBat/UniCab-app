@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [vue(), vueDevTools(), tailwindcss()],
   server: {
     proxy: {
-      '/api': 'http://localhost:3000', // Proxy verso il backend Express
+      '/api': 'https://unicab-api.onrender.com/', // Proxy verso il backend Express
     }
   },
   resolve: {
