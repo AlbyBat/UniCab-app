@@ -5,7 +5,7 @@
         <h1 class="text-4xl">UniCab</h1>
       </div>
       <div class="nav-right">
-        <router-link :to="`/home/${userId}`" class="nav-button">Home</router-link>
+        <a @click="handleHomeClick" class="nav-button">Home</a>
         <router-link to="/register" class="nav-button join-btn">Unisciti</router-link>
         <router-link to="/support" class="nav-button">Supporto</router-link>
       </div>
@@ -31,12 +31,19 @@ export default {
     userId() {
       const user = JSON.parse(localStorage.getItem('user'));
       return user?.userId || '';
+    },
+    isLoggedIn() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      return user && user.userId;
     }
   },
-  mounted() {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (!user || !user.userId) {
-      this.$router.push('/login');
+  methods: {
+    handleHomeClick() {
+      if (this.isLoggedIn) {
+        this.$router.push(`/home/${this.userId}`);
+      } else {
+        this.$router.push('/login');
+      }
     }
   }
 };
