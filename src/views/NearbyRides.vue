@@ -3,7 +3,7 @@
     <h2 class="rides-title">Viaggi disponibili</h2>
     <div v-if="rides.length === 0" class="no-rides">Nessun viaggio disponibile</div>
     <div v-else class="rides-container">
-      <div v-for="ride in rides" :key="ride._id" class="ride-card">
+      <div v-for="ride in rides" :key="ride._id" @click="goToRide(ride._id)" class="ride-card">
         <div class="ride-route">
           <strong>{{ ride.startPoint.address }} → {{ ride.endPoint.address }}</strong>
         </div>
@@ -90,7 +90,10 @@ export default {
           Partenza: ${new Date(ride.departureTime).toLocaleString()}
         `);
       });
-    }
+    },
+    goToRide(id) {
+      this.$router.push(`/${id}`);
+   }
   }
 };
 </script>
@@ -115,6 +118,13 @@ export default {
   padding: 1rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   border-left: 4px solid #004d99;
+  cursor: pointer; /* Aggiunto per indicare che è cliccabile */
+  transition: transform 0.2s, box-shadow 0.2s; /* Aggiunto effetto hover */
+}
+
+.ride-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .ride-route {
