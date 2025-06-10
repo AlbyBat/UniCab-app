@@ -2,7 +2,7 @@
   <div class="landing">
     <nav class="navbar">
       <div class="nav-left">
-        <h1 class="text-4xl"> UniCab</h1>
+        <h1 class="text-4xl">UniCab</h1>
       </div>
       <div class="nav-right">
         <router-link :to="`/home/${userId}`" class="nav-button">Home</router-link>
@@ -12,87 +12,38 @@
     </nav>
 
     <div class="main-content">
-  
-      <div id="map" class="map"></div>
-
-
+      <div id="map" class="map"></div>   
       <div class="rides-panel">
-        <h2 class="text-2xl font-bold mb-4">Viaggi disponibili</h2>
-        <div v-if="rides.length === 0">Nessun viaggio disponibile</div>
-        <div v-else class="rides-list">
-          <div v-for="ride in rides" :key="ride._id" @click="goToRide(ride._id)" class="ride-card">
-            <h3>{{ ride.startPoint.address }} → {{ ride.endPoint.address }}</h3>
-            <p><strong>Partenza:</strong> {{ formatDate(ride.departureTime) }}</p>
-            <p><strong>Posti disponibili:</strong> {{ ride.availableSeats }}</p>
-            <p><strong>Prezzo:</strong> €{{ ride.price.toFixed(2) }}</p>
-            <p v-if="ride.additionalInfo"><strong>Note:</strong> {{ ride.additionalInfo }}</p>
-          </div>
-        </div>
+        <NearbyRides />  
       </div>
     </div>
   </div>
 </template>
 
-
 <script>
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import NearbyRides from './NearbyRides.vue';  
 
 export default {
-  data() {
-    return {
-      rides: []
-    };
+  components: {
+    NearbyRides
   },
   computed: {
     userId() {
       const user = JSON.parse(localStorage.getItem('user'));
       return user?.userId || '';
     }
-  },
-  async created() {
-    try {
-      await fetch('/api/rides/refresh-status', {
-        method: 'PATCH',
-      });
-      const res = await fetch('/api/rides');
-      this.rides = await res.json();
-    } catch (err) {
-      console.error('Errore nel caricamento dei viaggi:', err);
-    }
-  },
-  mounted() {
-    
-    const map = L.map('map').setView([46.06, 11.12], 13); 
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-  },
-  methods: {
-    formatDate(datetime) {
-      const options = {
-        weekday: 'long', year: 'numeric', month: 'long',
-        day: 'numeric', hour: '2-digit', minute: '2-digit'
-      };
-      return new Date(datetime).toLocaleDateString('it-IT', options);
-    },
-    goToRide(id) {
-      this.$router.push(`/${id}`);
-    }
   }
 };
 </script>
 
 <style scoped>
-
 html, body, #app {
   height: 100%;
   margin: 0;
   padding: 0;
 }
 
+/* Contenitore principale */
 .landing {
   height: 100vh;
   display: flex;
@@ -101,6 +52,7 @@ html, body, #app {
   color: #222;
 }
 
+/* Navbar */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -116,6 +68,7 @@ html, body, #app {
   color: white;
 }
 
+/* Pulsanti navbar */
 .nav-right {
   display: flex;
   gap: 1rem;
@@ -135,7 +88,7 @@ html, body, #app {
   background-color: #cce0ff;
 }
 
-
+/* Main content: mappa + lista viaggi */
 .main-content {
   flex: 1;
   display: flex;
@@ -170,10 +123,12 @@ html, body, #app {
   cursor: pointer;
   transition: box-shadow 0.2s ease;
 }
+
 .ride-card:hover {
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
+/* Pulsante Unisciti */
 .join-btn {
   background-color: #ff6600;
   color: white;
