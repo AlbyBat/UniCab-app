@@ -56,7 +56,7 @@ export default {
       try {
         this.isSubmitting = true;
         const token = localStorage.getItem('token');
-        const res = await fetch('/api/tickets', {
+        const res = await fetch('https://unicab-api.onrender.com/api/tickets', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

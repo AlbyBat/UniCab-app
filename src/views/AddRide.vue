@@ -159,7 +159,7 @@ export default {
           endCoordinates
         };
 
-        const res = await fetch('/api/rides', {
+        const res = await fetch('https://unicab-api.onrender.com/api/rides', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

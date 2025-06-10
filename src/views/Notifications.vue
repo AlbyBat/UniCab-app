@@ -49,7 +49,7 @@ export default {
     const token = localStorage.getItem('token');
 
     try {
-      const res = await fetch('/api/notifications', {
+      const res = await fetch('https://unicab-api.onrender.com/api/notifications', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -73,7 +73,7 @@ export default {
     async markAllAsRead() {
       const token = localStorage.getItem('token');
       try {
-        const res = await fetch('/api/notifications/mark-all-read', {
+        const res = await fetch('https://unicab-api.onrender.com/api/notifications/mark-all-read', {
           method: 'PATCH',
           headers: {
             Authorization: `Bearer ${token}`

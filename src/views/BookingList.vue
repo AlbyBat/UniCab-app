@@ -103,7 +103,7 @@ export default {
     this.reviewedRides = saved ? JSON.parse(saved) : [];
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('/api/bookings/my-bookings', {
+      const res = await fetch('https://unicab-api.onrender.com/api/bookings/my-bookings', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`
@@ -164,7 +164,7 @@ export default {
     async fetchReviewedUsers() {
       const token = localStorage.getItem('token');
       const promises = this.rides.map(async (ride) => {
-        const res = await fetch(`/api/ratings/my-reviewed-passengers/${ride._id}`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/ratings/my-reviewed-passengers/${ride._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.ok) {
@@ -185,7 +185,7 @@ export default {
       if (!confirm('Sei sicuro di voler cancellare questa prenotazione?')) return;
 
       try {
-        const res = await fetch(`/api/bookings/${bookingId}`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/bookings/${bookingId}`, {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${token}`

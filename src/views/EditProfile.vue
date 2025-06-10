@@ -86,7 +86,7 @@ export default {
       return
     }
 
-    const res = await fetch('/api/home', {
+    const res = await fetch('https://unicab-api.onrender.com/api/home', {
       headers: { Authorization: `Bearer ${token}` }
     })
     const data = await res.json()
@@ -112,7 +112,7 @@ export default {
       if (!this.validatePhone()) return
 
       const token = localStorage.getItem('token')
-      const res = await fetch('/api/user/profile', {
+      const res = await fetch('https://unicab-api.onrender.com/api/user/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

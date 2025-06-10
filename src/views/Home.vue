@@ -103,7 +103,7 @@ export default {
       }
 
       try {
-        const res = await fetch(`/api/users/${routeId}`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/users/${routeId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 

@@ -77,7 +77,7 @@ export default {
       const token = localStorage.getItem('token');
 
       try {
-        const res = await fetch('/api/admin/reports', {
+        const res = await fetch('https://unicab-api.onrender.com/api/admin/reports', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -115,7 +115,7 @@ export default {
       if (!confirm(messages[action])) return;
 
       try {
-        const res = await fetch(`/api/admin/users/${userId}/${action}`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/admin/users/${userId}/${action}`, {
           method: 'PATCH',
           headers: {
             Authorization: `Bearer ${token}`

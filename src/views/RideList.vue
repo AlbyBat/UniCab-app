@@ -130,7 +130,7 @@ export default {
     const token = localStorage.getItem('token');
 
     try {
-      const res = await fetch('/api/rides/my-rides', {
+      const res = await fetch('https://unicab-api.onrender.com/api/rides/my-rides', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -186,7 +186,7 @@ export default {
 
       const token = localStorage.getItem('token');
       try {
-        const res = await fetch(`/api/rides/${rideId}`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/rides/${rideId}`, {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${token}`
@@ -205,7 +205,7 @@ export default {
     async completeRide(rideId) {
       const token = localStorage.getItem('token');
       try {
-        const res = await fetch(`/api/rides/complete/${rideId}`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/rides/complete/${rideId}`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`
@@ -225,7 +225,7 @@ export default {
     async fetchReviewedUsers() {
       const token = localStorage.getItem('token');
       const promises = this.rides.map(async (ride) => {
-        const res = await fetch(`/api/ratings/my-reviewed-passengers/${ride._id}`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/ratings/my-reviewed-passengers/${ride._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.ok) {

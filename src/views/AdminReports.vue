@@ -91,7 +91,7 @@ export default {
       try {
         this.loadingReports = true;
         const token = localStorage.getItem('token');
-        const res = await fetch('/api/admin/reports', {
+        const res = await fetch('https://unicab-api.onrender.com/api/admin/reports', {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error('Errore nel caricamento delle segnalazioni');
@@ -107,7 +107,7 @@ export default {
       if (!confirm('Sei sicuro di voler eliminare questa segnalazione?')) return;
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`/api/reports/${id}`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/reports/${id}`, {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -124,7 +124,7 @@ export default {
       try {
         this.loadingTickets = true;
         const token = localStorage.getItem('token');
-        const res = await fetch('/api/tickets', {
+        const res = await fetch('https://unicab-api.onrender.com/api/tickets', {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error('Errore nel caricamento dei ticket');
@@ -145,7 +145,7 @@ export default {
 
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`/api/tickets/${ticketId}/respond`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/tickets/${ticketId}/respond`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

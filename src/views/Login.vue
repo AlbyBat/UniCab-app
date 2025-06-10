@@ -68,7 +68,7 @@ export default {
       this.loading = true
 
       try {
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch('https://unicab-api.onrender.com/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

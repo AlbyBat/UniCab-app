@@ -70,7 +70,7 @@ export default {
     }
 
     try {
-      const res = await fetch(`/api/bookings/${bookingId}`, {
+      const res = await fetch(`https://unicab-api.onrender.com/api/bookings/${bookingId}`, {
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -101,7 +101,7 @@ export default {
     async confirmParticipation() {
       const token = localStorage.getItem('token');
       try {
-        const res = await fetch(`/api/bookings/${this.ride._id}/confirm`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/bookings/${this.ride._id}/confirm`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`
@@ -133,7 +133,7 @@ export default {
       if (!this.isConfirmed && this.booking?._id) {
         const token = localStorage.getItem('token');
         try {
-          const res = await fetch(`/api/bookings/${this.booking._id}`, {
+          const res = await fetch(`https://unicab-api.onrender.com/api/bookings/${this.booking._id}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` }
           });

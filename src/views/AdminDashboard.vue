@@ -67,7 +67,7 @@ export default {
   async created() {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('/api/admin/reports', {
+      const res = await fetch('https://unicab-api.onrender.com/api/admin/reports', {
         headers: {
           Authorization: `Bearer ${token}`
         }

@@ -65,7 +65,7 @@ const router = useRouter()
 const register = async () => {
   errorMsg.value = ''
   try {
-    const res = await fetch('/api/auth/register', {
+    const res = await fetch('https://unicab-api.onrender.com/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

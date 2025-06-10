@@ -67,7 +67,7 @@ export default {
       const token = localStorage.getItem('token');
 
       try {
-        const res = await fetch(`/api/ratings/${this.destinationUserId}`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/ratings/${this.destinationUserId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

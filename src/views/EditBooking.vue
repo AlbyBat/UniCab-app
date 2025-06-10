@@ -56,7 +56,7 @@ export default {
     const bookingId = this.$route.params.id;
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`/api/bookings/${bookingId}`, {
+      const res = await fetch(`https://unicab-api.onrender.com/api/bookings/${bookingId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Errore nel caricamento della prenotazione');
@@ -76,7 +76,7 @@ export default {
       const token = localStorage.getItem('token');
 
       try {
-        const res = await fetch(`/api/bookings/${bookingId}`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/bookings/${bookingId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

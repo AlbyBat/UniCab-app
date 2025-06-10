@@ -60,7 +60,7 @@ export default {
     const token = localStorage.getItem('token');
     this.isLoggedIn = !!token;
     try {
-      const res = await fetch(`/api/rides/${rideId}`);
+      const res = await fetch(`https://unicab-api.onrender.com/api/rides/${rideId}`);
       if (res.ok) {
         this.ride = await res.json();
       } else {
@@ -80,7 +80,7 @@ export default {
       this.isLoggedIn = !!token;
 
       try {
-        const res = await fetch(`/api/rides/${rideId}`);
+        const res = await fetch(`https://unicab-api.onrender.com/api/rides/${rideId}`);
         if (res.ok) {
           this.ride = await res.json();
           this.initMap();
@@ -96,7 +96,7 @@ export default {
         const rideId = this.$route.params.id;
 
         try {
-        const res = await fetch(`/api/bookings/${rideId}/book`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/bookings/${rideId}/book`, {
             method: 'POST',
             headers: {
             'Content-Type': 'application/json',

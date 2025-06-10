@@ -37,7 +37,7 @@ const error = ref(null);
 
 async function fetchRides() {
   try {
-    const response = await fetch('/api/rides');
+    const response = await fetch('https://unicab-api.onrender.com/api/rides');
     if (!response.ok) throw new Error('Errore nel recupero dei viaggi');
     const data = await response.json();
     rides.value = data;
@@ -50,7 +50,7 @@ async function fetchRides() {
 
 async function markAsCompleted(rideId) {
   try {
-    const res = await fetch(`/api/rides/complete/${rideId}`, {
+    const res = await fetch(`https://unicab-api.onrender.com/api/rides/complete/${rideId}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -68,7 +68,7 @@ async function deleteRide(rideId) {
   if (!confirmed) return;
 
   try {
-    const res = await fetch(`/api/rides/${rideId}`, {
+    const res = await fetch(`https://unicab-api.onrender.com/api/rides/${rideId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`

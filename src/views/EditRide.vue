@@ -91,7 +91,7 @@ export default {
     const rideId = this.$route.params.id;
     const token = localStorage.getItem('token');
      try {
-    const res = await fetch(`/api/rides/${rideId}`, {
+    const res = await fetch(`https://unicab-api.onrender.com/api/rides/${rideId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -152,7 +152,7 @@ export default {
         const startCoordinates = await geocodeAddress(this.form.startAddress);
         const endCoordinates = await geocodeAddress(this.form.endAddress);
 
-        const res = await fetch(`/api/rides/${rideId}`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/rides/${rideId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

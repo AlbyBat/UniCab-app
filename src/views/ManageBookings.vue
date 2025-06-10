@@ -43,7 +43,7 @@ export default {
   }
 
   try {
-    const res = await fetch(`/api/bookings/by-ride/${rideId}`, {
+    const res = await fetch(`https://unicab-api.onrender.com/api/bookings/by-ride/${rideId}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -66,7 +66,7 @@ export default {
       if (!confirm('Sei sicuro di voler rifiutare questa prenotazione?')) return;
 
       try {
-        const res = await fetch(`/api/bookings/${bookingId}`, {
+        const res = await fetch(`https://unicab-api.onrender.com/api/bookings/${bookingId}`, {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${token}`

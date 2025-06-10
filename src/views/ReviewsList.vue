@@ -32,7 +32,7 @@ export default {
     const userId = this.$route.params.id;
 
     try {
-      const res = await fetch(`/api/ratings/user/${userId}`, {
+      const res = await fetch(`https://unicab-api.onrender.com/api/ratings/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
