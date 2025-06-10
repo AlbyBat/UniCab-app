@@ -95,7 +95,7 @@ export default {
     },
 
     loginWithGoogle() {
-      window.location.href = '/api/auth/google'
+      window.location.href = 'https://unicab-api.onrender.com/api/auth/google'
     },
 
     parseJwt(token) {
