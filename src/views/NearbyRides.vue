@@ -60,7 +60,7 @@ export default {
   methods: {
     async fetchNearbyRides(lat, lon) {
       try {
-        const response = await axios.get('/api/rides/nearby', {
+        const response = await axios.get('https://unicab-api.onrender.com/api/rides/nearby', {
           params: { lat, lon }
         });
         this.rides = response.data.rides || response.data;
@@ -71,7 +71,7 @@ export default {
     },
     async fetchAllRides() {
       try {
-        const response = await axios.get('/api/rides');
+        const response = await axios.get('https://unicab-api.onrender.com/api/rides');
         this.rides = response.data;
         this.addMarkers();
       } catch (err) {
