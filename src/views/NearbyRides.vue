@@ -24,6 +24,8 @@
 import axios from 'axios'; 
 import L from 'leaflet';
 
+L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.7.1/dist/images/';
+
 export default {
   name: 'NearbyRides',
   data() {
